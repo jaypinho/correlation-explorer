@@ -337,22 +337,28 @@ pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] f
 st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
 
 dataset1_df = pd.DataFrame(datasets[0])
-dataset1_df = dataset1_df.rename(columns={"value": dataset1_picker})
+dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
 dataset2_df = pd.DataFrame(datasets[1])
-dataset2_df = dataset2_df.rename(columns={"value": dataset2_picker})
+dataset2_df = dataset2_df.rename(columns={"value": 'data2'})
 
 chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
-chart_df = chart_df[['date', dataset1_picker, dataset2_picker]]
 
-chart_df
+if dataset1_picker != dataset2_picker:
+    table_df = chart_df.rename(columns={'data1': dataset1_picker, 'data2': dataset2_picker})
+    table_df = table_df[['date', dataset1_picker, dataset2_picker]]
+else:
+    table_df = chart_df.rename(columns={'data1': f'1 - {dataset1_picker}', 'data2': f'2 - {dataset2_picker}'})
+    table_df = table_df[['date', f'1 - {dataset1_picker}', f'2 - {dataset2_picker}']]
+
+table_df
 
 dataset1_short_title = next((x['short_title'] for x in eligible_datasets if dataset1_picker == x['title']), None)
 dataset2_short_title = next((x['short_title'] for x in eligible_datasets if dataset2_picker == x['title']), None)
 
 # Taken from https://stackoverflow.com/q/70117272 
 base = alt.Chart(chart_df).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
-line =  base.mark_line(color='red').encode(y=alt.Y(f'{dataset1_picker}:Q', axis=alt.Axis(grid=True, titleColor='red')).title(dataset1_short_title))
-line2 = base.mark_line(color='blue').encode(y=alt.Y(f'{dataset2_picker}:Q', axis=alt.Axis(titleColor='blue')).title(dataset2_short_title))
+line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True, titleColor='red')).title(dataset1_short_title))
+line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue')).title(dataset2_short_title))
 c = (line + line2).resolve_scale(y='independent').properties(width=600)
 st.altair_chart(c, use_container_width=True)
 
