@@ -242,42 +242,61 @@ def isfloat(num):
 
 eligible_datasets = [
     {
-        'title': 'University of Michigan Index of Consumer Sentiment'
+        'title': 'University of Michigan Index of Consumer Sentiment',
+        'short_title': 'UMich Consumer Sentiment',
+        'url': 'http://www.sca.isr.umich.edu/'
+        # 'description': 'The Index of Consumer Sentiment'
     },
     {
-        'title': 'University of Michigan Index of Consumer Expectations'
+        'title': 'University of Michigan Index of Consumer Expectations',
+        'short_title': 'UMich Consumer Expectations',
+        'url': 'http://www.sca.isr.umich.edu/'
     },
     {
-        'title': 'University of Michigan Index of Current Economic Conditions'
+        'title': 'University of Michigan Index of Current Economic Conditions',
+        'short_title': 'UMich Current Economic Conditions',
+        'url': 'http://www.sca.isr.umich.edu/'
     },
     {
-        'title': 'Conference Board Consumer Confidence Index'
+        'title': 'Conference Board Consumer Confidence Index',
+        'short_title': 'Conf. Board Consumer Confidence',
+        'url': 'https://www.conference-board.org/topics/consumer-confidence'
     },
     {
-        'title': 'Civiqs National Economy Current Condition: Net Good',
+        'title': 'Civiqs National Economy Current Condition - Net Good',
+        'short_title': 'Civiqs Economic Sentiment',
         'url': 'https://civiqs.com/results/economy_us_now?uncertainty=true&annotations=true&zoomIn=true&net=true'
     },
     {
-        'title': 'A Democrat is President of the United States'
+        'title': 'A Democrat is President of the United States',
+        'short_title': 'Democrat is U.S. President',
+        'url': 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States'
     },
     {
         'title': 'Federal Reserve Bank of San Francisco Daily News Sentiment Index',
+        'short_title': 'FRBSF Daily News Sentiment',
         'url': 'https://www.frbsf.org/research-and-insights/data-and-indicators/daily-news-sentiment-index/'
     },
     {
         'title': 'GasBuddy National Gas Prices',
+        'short_title': 'GasBuddy National Gas Prices',
         'url': 'https://fuelinsights.gasbuddy.com/charts'
     },
     {
-        'title': 'Civiqs Joe Biden Job Approval: Net Approve',
+        'title': 'Civiqs Joe Biden Job Approval - Net Approve',
+        'short_title': 'Civiqs Joe Biden Job Approval',
         'url': 'https://civiqs.com/results/approve_president_biden?uncertainty=true&annotations=true&zoomIn=true&net=true'
-    },
+    }
 ]
 
 st.header("Correlation Explorer")
 
 dataset1_picker = st.selectbox('Pick dataset #1', [x['title'] for x in eligible_datasets], index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
+# st.caption(next((x['description'] for x in eligible_datasets if dataset1_picker == x['title'] and 'description' in x), ''))
+st.caption(next((x['url'] for x in eligible_datasets if dataset1_picker == x['title']), ''))
 dataset2_picker = st.selectbox('Pick dataset #2', [x['title'] for x in eligible_datasets], index=3, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
+# st.caption(next((x['description'] for x in eligible_datasets if dataset2_picker == x['title'] and 'description' in x), ''))
+st.caption(next((x['url'] for x in eligible_datasets if dataset2_picker == x['title']), ''))
 
 dataset_candidates = []
 for dataset_index in [1, 2]:
@@ -299,7 +318,7 @@ for dataset_index in [1, 2]:
         dataset_candidates.append(get_umich_data(series='icc'))
     elif dataset_value == 'Conference Board Consumer Confidence Index':
         dataset_candidates.append(get_conference_board_leading_indicators_data(exact_date=False))
-    elif dataset_value == 'Civiqs National Economy Current Condition: Net Good':
+    elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
         dataset_candidates.append(average_daily_data_over_interval(get_civiqs_sentiment_data(), '%Y-%m'))
     elif dataset_value == 'A Democrat is President of the United States':
         dataset_candidates.append(average_daily_data_over_interval(get_democrat_in_white_house_data(), '%Y-%m'))
@@ -307,7 +326,7 @@ for dataset_index in [1, 2]:
         dataset_candidates.append(average_daily_data_over_interval(get_frb_news_sentiment_data(), '%Y-%m'))
     elif dataset_value == 'GasBuddy National Gas Prices':
         dataset_candidates.append(average_daily_data_over_interval(get_gasbuddy_prices(), '%Y-%m'))
-    elif dataset_value == 'Civiqs Joe Biden Job Approval: Net Approve':
+    elif dataset_value == 'Civiqs Joe Biden Job Approval - Net Approve':
         dataset_candidates.append(average_daily_data_over_interval(get_civiqs_biden_job_approval_data(), '%Y-%m'))
 
 datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
@@ -318,22 +337,26 @@ pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] f
 st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
 
 dataset1_df = pd.DataFrame(datasets[0])
-dataset1_df = dataset1_df.rename(columns={"value": "data1"})
+dataset1_df = dataset1_df.rename(columns={"value": dataset1_picker})
 dataset2_df = pd.DataFrame(datasets[1])
-dataset2_df = dataset2_df.rename(columns={"value": "data2"})
+dataset2_df = dataset2_df.rename(columns={"value": dataset2_picker})
 
 chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
+chart_df = chart_df[['date', dataset1_picker, dataset2_picker]]
 
 chart_df
 
+dataset1_short_title = next((x['short_title'] for x in eligible_datasets if dataset1_picker == x['title']), None)
+dataset2_short_title = next((x['short_title'] for x in eligible_datasets if dataset2_picker == x['title']), None)
+
 # Taken from https://stackoverflow.com/q/70117272 
 base = alt.Chart(chart_df).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
-line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True)))
-line2 = base.mark_line().encode(y='data2:Q')
+line =  base.mark_line(color='red').encode(y=alt.Y(f'{dataset1_picker}:Q', axis=alt.Axis(grid=True, titleColor='red')).title(dataset1_short_title))
+line2 = base.mark_line(color='blue').encode(y=alt.Y(f'{dataset2_picker}:Q', axis=alt.Axis(titleColor='blue')).title(dataset2_short_title))
 c = (line + line2).resolve_scale(y='independent').properties(width=600)
 st.altair_chart(c, use_container_width=True)
 
 with st.expander("See methodology"):
     st.write('''
-        Hey.
+        Coming soon.
     ''')
