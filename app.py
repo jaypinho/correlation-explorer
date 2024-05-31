@@ -241,63 +241,76 @@ def isfloat(num):
 
 
 eligible_datasets = [
-    'UMich ICS',
-    'UMich ICE',
-    'UMich ICC',
-    'Conference Board Consumer Confidence Index',
-    'Civiqs Sentiment',
-    'Democrat is President',
-    'FRB News Sentiment',
-    'Gas Prices',
-    'Biden Job Approval'
+    {
+        'title': 'University of Michigan Index of Consumer Sentiment'
+    },
+    {
+        'title': 'University of Michigan Index of Consumer Expectations'
+    },
+    {
+        'title': 'University of Michigan Index of Current Economic Conditions'
+    },
+    {
+        'title': 'Conference Board Consumer Confidence Index'
+    },
+    {
+        'title': 'Civiqs National Economy Current Condition: Net Good',
+        'url': 'https://civiqs.com/results/economy_us_now?uncertainty=true&annotations=true&zoomIn=true&net=true'
+    },
+    {
+        'title': 'A Democrat is President of the United States'
+    },
+    {
+        'title': 'Federal Reserve Bank of San Francisco Daily News Sentiment Index',
+        'url': 'https://www.frbsf.org/research-and-insights/data-and-indicators/daily-news-sentiment-index/'
+    },
+    {
+        'title': 'GasBuddy National Gas Prices',
+        'url': 'https://fuelinsights.gasbuddy.com/charts'
+    },
+    {
+        'title': 'Civiqs Joe Biden Job Approval: Net Approve',
+        'url': 'https://civiqs.com/results/approve_president_biden?uncertainty=true&annotations=true&zoomIn=true&net=true'
+    },
 ]
-
 
 st.header("Correlation Explorer")
 
-dataset1_picker = st.selectbox('Pick dataset #1', eligible_datasets, index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
-dataset2_picker = st.selectbox('Pick dataset #2', eligible_datasets, index=3, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
+dataset1_picker = st.selectbox('Pick dataset #1', [x['title'] for x in eligible_datasets], index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
+dataset2_picker = st.selectbox('Pick dataset #2', [x['title'] for x in eligible_datasets], index=3, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
 
+dataset_candidates = []
+for dataset_index in [1, 2]:
 
-if dataset1_picker == 'UMich ICS':
-    dataset1 = get_umich_data(series='ics')
-elif dataset1_picker == 'UMich ICE':
-    dataset1 = get_umich_data(series='ice')
-elif dataset1_picker == 'UMich ICC':
-    dataset1 = get_umich_data(series='icc')
-elif dataset1_picker == 'Conference Board Consumer Confidence Index':
-    dataset1 = get_conference_board_leading_indicators_data(exact_date=False)
-elif dataset1_picker == 'Civiqs Sentiment':
-    dataset1 = average_daily_data_over_interval(get_civiqs_sentiment_data(), '%Y-%m')
-elif dataset1_picker == 'Democrat is President':
-    dataset1 = average_daily_data_over_interval(get_democrat_in_white_house_data(), '%Y-%m')
-elif dataset1_picker == 'FRB News Sentiment':
-    dataset1 = average_daily_data_over_interval(get_frb_news_sentiment_data(), '%Y-%m')
-elif dataset1_picker == 'Gas Prices':
-    dataset1 = average_daily_data_over_interval(get_gasbuddy_prices(), '%Y-%m')
-elif dataset1_picker == 'Biden Job Approval':
-    dataset1 = average_daily_data_over_interval(get_civiqs_biden_job_approval_data(), '%Y-%m')
+    print(dataset_index)
 
-if dataset2_picker == 'UMich ICS':
-    dataset2 = get_umich_data(series='ics')
-elif dataset2_picker == 'UMich ICE':
-    dataset2 = get_umich_data(series='ice')
-elif dataset2_picker == 'UMich ICC':
-    dataset2 = get_umich_data(series='icc')
-elif dataset2_picker == 'Conference Board Consumer Confidence Index':
-    dataset2 = get_conference_board_leading_indicators_data(exact_date=False)
-elif dataset2_picker == 'Civiqs Sentiment':
-    dataset2 = average_daily_data_over_interval(get_civiqs_sentiment_data(), '%Y-%m')
-elif dataset2_picker == 'Democrat is President':
-    dataset2 = average_daily_data_over_interval(get_democrat_in_white_house_data(), '%Y-%m')
-elif dataset2_picker == 'FRB News Sentiment':
-    dataset2 = average_daily_data_over_interval(get_frb_news_sentiment_data(), '%Y-%m')
-elif dataset2_picker == 'Gas Prices':
-    dataset2 = average_daily_data_over_interval(get_gasbuddy_prices(), '%Y-%m')
-elif dataset2_picker == 'Biden Job Approval':
-    dataset2 = average_daily_data_over_interval(get_civiqs_biden_job_approval_data(), '%Y-%m')
+    if dataset_index == 1:
+        dataset_value = dataset1_picker
+    else:
+        dataset_value = dataset2_picker
 
-datasets = align_datasets(dataset1, dataset2, include_dates=True)
+    print(dataset_value)
+
+    if dataset_value == 'University of Michigan Index of Consumer Sentiment':
+        dataset_candidates.append(get_umich_data(series='ics'))
+    elif dataset_value == 'University of Michigan Index of Consumer Expectations':
+        dataset_candidates.append(get_umich_data(series='ice'))
+    elif dataset_value == 'University of Michigan Index of Current Economic Conditions':
+        dataset_candidates.append(get_umich_data(series='icc'))
+    elif dataset_value == 'Conference Board Consumer Confidence Index':
+        dataset_candidates.append(get_conference_board_leading_indicators_data(exact_date=False))
+    elif dataset_value == 'Civiqs National Economy Current Condition: Net Good':
+        dataset_candidates.append(average_daily_data_over_interval(get_civiqs_sentiment_data(), '%Y-%m'))
+    elif dataset_value == 'A Democrat is President of the United States':
+        dataset_candidates.append(average_daily_data_over_interval(get_democrat_in_white_house_data(), '%Y-%m'))
+    elif dataset_value == 'Federal Reserve Bank of San Francisco Daily News Sentiment Index':
+        dataset_candidates.append(average_daily_data_over_interval(get_frb_news_sentiment_data(), '%Y-%m'))
+    elif dataset_value == 'GasBuddy National Gas Prices':
+        dataset_candidates.append(average_daily_data_over_interval(get_gasbuddy_prices(), '%Y-%m'))
+    elif dataset_value == 'Civiqs Joe Biden Job Approval: Net Approve':
+        dataset_candidates.append(average_daily_data_over_interval(get_civiqs_biden_job_approval_data(), '%Y-%m'))
+
+datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
 print(datasets)
 
 pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] for x in datasets[1]])
@@ -319,3 +332,8 @@ line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid
 line2 = base.mark_line().encode(y='data2:Q')
 c = (line + line2).resolve_scale(y='independent').properties(width=600)
 st.altair_chart(c, use_container_width=True)
+
+with st.expander("See methodology"):
+    st.write('''
+        Hey.
+    ''')
