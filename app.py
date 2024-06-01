@@ -139,6 +139,17 @@ def get_gasbuddy_prices():
     
     return [ {'date': datetime.datetime.strptime(x['datetime'], '%m/%d/%Y').strftime('%Y-%m-%d'), 'value': x['price']} for x in gas_prices[0]['USList']]
 
+def get_joe_biden_polling_average():
+    polling_average = requests.get('https://projects.fivethirtyeight.com/polls/president-general/2024/national/polling-average.json').json()
+
+    polling_average = [x for x in polling_average if x['candidate'] == 'Biden']
+
+    polling_average = [ {(key if key == 'date' else 'value'): value for key, value in nested_dict.items() if key in ['date', 'pct_estimate']} for nested_dict in polling_average ]
+
+    polling_average = sorted(polling_average, key = lambda x: x['date'])
+
+    return polling_average
+
 # For example, FRBSF measures news sentiment daily, but we may want to average all values in a month if the dependent variable we're testing against (e.g. UMich consumer sentiment) is only available monthly.
 def average_daily_data_over_interval(data, strftime_interval):
     
@@ -189,48 +200,63 @@ eligible_datasets = [
     {
         'title': 'University of Michigan Index of Consumer Sentiment',
         'short_title': 'UMich Consumer Sentiment',
-        'url': 'http://www.sca.isr.umich.edu/'
+        'url': 'http://www.sca.isr.umich.edu/',
+        'cadence': 'monthly'
         # 'description': 'The Index of Consumer Sentiment'
     },
     {
         'title': 'University of Michigan Index of Consumer Expectations',
         'short_title': 'UMich Consumer Expectations',
-        'url': 'http://www.sca.isr.umich.edu/'
+        'url': 'http://www.sca.isr.umich.edu/',
+        'cadence': 'monthly'
     },
     {
         'title': 'University of Michigan Index of Current Economic Conditions',
         'short_title': 'UMich Current Economic Conditions',
-        'url': 'http://www.sca.isr.umich.edu/'
+        'url': 'http://www.sca.isr.umich.edu/',
+        'cadence': 'monthly'
     },
     {
         'title': 'Conference Board Consumer Confidence Index',
         'short_title': 'Conf. Board Consumer Confidence',
-        'url': 'https://www.conference-board.org/topics/consumer-confidence'
+        'url': 'https://www.conference-board.org/topics/consumer-confidence',
+        'cadence': 'monthly'
     },
     {
         'title': 'Civiqs National Economy Current Condition - Net Good',
         'short_title': 'Civiqs Economic Sentiment',
-        'url': 'https://civiqs.com/results/economy_us_now?uncertainty=true&annotations=true&zoomIn=true&net=true'
+        'url': 'https://civiqs.com/results/economy_us_now?uncertainty=true&annotations=true&zoomIn=true&net=true',
+        'cadence': 'daily'
     },
     {
         'title': 'A Democrat is President of the United States',
         'short_title': 'Democrat is U.S. President',
-        'url': 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States'
+        'url': 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States',
+        'cadence': 'daily'
     },
     {
         'title': 'Federal Reserve Bank of San Francisco Daily News Sentiment Index',
         'short_title': 'FRBSF Daily News Sentiment',
-        'url': 'https://www.frbsf.org/research-and-insights/data-and-indicators/daily-news-sentiment-index/'
+        'url': 'https://www.frbsf.org/research-and-insights/data-and-indicators/daily-news-sentiment-index/',
+        'cadence': 'daily'
     },
     {
         'title': 'GasBuddy National Gas Prices',
         'short_title': 'GasBuddy National Gas Prices',
-        'url': 'https://fuelinsights.gasbuddy.com/charts'
+        'url': 'https://fuelinsights.gasbuddy.com/charts',
+        'cadence': 'daily'
     },
     {
         'title': 'Civiqs Joe Biden Job Approval - Net Approve',
         'short_title': 'Civiqs Joe Biden Job Approval',
-        'url': 'https://civiqs.com/results/approve_president_biden?uncertainty=true&annotations=true&zoomIn=true&net=true'
+        'url': 'https://civiqs.com/results/approve_president_biden?uncertainty=true&annotations=true&zoomIn=true&net=true',
+        'cadence': 'daily'
+    },
+    {
+        'title': '538 Joe Biden 2024 Election Polling Average',
+        'short_title': 'Biden 2024 Polling Avg',
+        'url': 'https://projects.fivethirtyeight.com/polls/president-general/2024/national/',
+        'cadence': 'daily'
     }
 ]
 
@@ -246,15 +272,14 @@ st.caption(next((x['url'] for x in eligible_datasets if dataset2_picker == x['ti
 dataset_candidates = []
 for dataset_index in [1, 2]:
 
-    print(dataset_index)
-
     if dataset_index == 1:
         dataset_value = dataset1_picker
     else:
         dataset_value = dataset2_picker
 
-    print(dataset_value)
+    revised_dataset = None
 
+    # Monthly indicators
     if dataset_value == 'University of Michigan Index of Consumer Sentiment':
         dataset_candidates.append(get_umich_data(series='ics'))
     elif dataset_value == 'University of Michigan Index of Consumer Expectations':
@@ -263,49 +288,68 @@ for dataset_index in [1, 2]:
         dataset_candidates.append(get_umich_data(series='icc'))
     elif dataset_value == 'Conference Board Consumer Confidence Index':
         dataset_candidates.append(get_conference_board_leading_indicators_data(exact_date=False))
+
+    # Potentially daily indicators
     elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
-        dataset_candidates.append(average_daily_data_over_interval(get_civiqs_sentiment_data(), '%Y-%m'))
+        revised_dataset = get_civiqs_sentiment_data()
     elif dataset_value == 'A Democrat is President of the United States':
-        dataset_candidates.append(average_daily_data_over_interval(get_democrat_in_white_house_data(), '%Y-%m'))
+        revised_dataset = get_democrat_in_white_house_data()
     elif dataset_value == 'Federal Reserve Bank of San Francisco Daily News Sentiment Index':
-        dataset_candidates.append(average_daily_data_over_interval(get_frb_news_sentiment_data(), '%Y-%m'))
+        revised_dataset = get_frb_news_sentiment_data()
     elif dataset_value == 'GasBuddy National Gas Prices':
-        dataset_candidates.append(average_daily_data_over_interval(get_gasbuddy_prices(), '%Y-%m'))
+        revised_dataset = get_gasbuddy_prices()
     elif dataset_value == 'Civiqs Joe Biden Job Approval - Net Approve':
-        dataset_candidates.append(average_daily_data_over_interval(get_civiqs_biden_job_approval_data(), '%Y-%m'))
+       revised_dataset = get_civiqs_biden_job_approval_data()
+    elif dataset_value == '538 Joe Biden 2024 Election Polling Average':
+        revised_dataset = get_joe_biden_polling_average()
+
+    if revised_dataset is not None and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset1_picker), None) == 'daily' and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset2_picker), None) == 'monthly' and dataset_index == 1:
+        dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
+    elif revised_dataset is not None and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset1_picker), None) == 'monthly' and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset2_picker), None) == 'daily' and dataset_index == 2:
+        dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
+    elif revised_dataset is not None:
+        dataset_candidates.append(revised_dataset)
+
 
 datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
-print(datasets)
 
-pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] for x in datasets[1]])
+if len(datasets[0]) >= 4:
 
-st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
+    pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] for x in datasets[1]])
 
-dataset1_df = pd.DataFrame(datasets[0])
-dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
-dataset2_df = pd.DataFrame(datasets[1])
-dataset2_df = dataset2_df.rename(columns={"value": 'data2'})
+    st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
 
-chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
+    dataset1_df = pd.DataFrame(datasets[0])
+    dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
+    dataset2_df = pd.DataFrame(datasets[1])
+    dataset2_df = dataset2_df.rename(columns={"value": 'data2'})
 
-if dataset1_picker != dataset2_picker:
-    table_df = chart_df.rename(columns={'data1': dataset1_picker, 'data2': dataset2_picker})
-    table_df = table_df[['date', dataset1_picker, dataset2_picker]]
+    chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
+
+    if dataset1_picker != dataset2_picker:
+        table_df = chart_df.rename(columns={'data1': dataset1_picker, 'data2': dataset2_picker})
+        table_df = table_df[['date', dataset1_picker, dataset2_picker]]
+    else:
+        table_df = chart_df.rename(columns={'data1': f'1 - {dataset1_picker}', 'data2': f'2 - {dataset2_picker}'})
+        table_df = table_df[['date', f'1 - {dataset1_picker}', f'2 - {dataset2_picker}']]
+
+    dataset1_short_title = next((x['short_title'] for x in eligible_datasets if dataset1_picker == x['title']), None)
+    dataset2_short_title = next((x['short_title'] for x in eligible_datasets if dataset2_picker == x['title']), None)
+
+    # Taken from https://stackoverflow.com/q/70117272 
+    base = alt.Chart(chart_df, height=500).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
+    line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title(dataset1_short_title))
+    line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue'), scale=alt.Scale(zero=False)).title(dataset2_short_title))
+    c = (line + line2).resolve_scale(y='independent').properties(width=600)
+    st.altair_chart(c, use_container_width=True)
+
+    with st.expander("See raw data"):
+        table_df
+
 else:
-    table_df = chart_df.rename(columns={'data1': f'1 - {dataset1_picker}', 'data2': f'2 - {dataset2_picker}'})
-    table_df = table_df[['date', f'1 - {dataset1_picker}', f'2 - {dataset2_picker}']]
 
-table_df
+    st.write('**Not enough data observations in common between these two datasets to calculate a meaningful correlation.** Try another combination of datasets.')
 
-dataset1_short_title = next((x['short_title'] for x in eligible_datasets if dataset1_picker == x['title']), None)
-dataset2_short_title = next((x['short_title'] for x in eligible_datasets if dataset2_picker == x['title']), None)
-
-# Taken from https://stackoverflow.com/q/70117272 
-base = alt.Chart(chart_df).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
-line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True, titleColor='red')).title(dataset1_short_title))
-line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue')).title(dataset2_short_title))
-c = (line + line2).resolve_scale(y='independent').properties(width=600)
-st.altair_chart(c, use_container_width=True)
 
 with st.expander("See methodology"):
     st.write('''
