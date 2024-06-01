@@ -5,6 +5,7 @@ import requests
 import io
 import datetime
 import altair as alt
+from streamlit.components.v1 import html
 
 def calculate_pearsons(series1, series2):
     return np.corrcoef(series1, series2)[0, 1]
@@ -364,5 +365,50 @@ st.altair_chart(c, use_container_width=True)
 
 with st.expander("See methodology"):
     st.write('''
-        Coming soon.
+        Each dataset above is available for free publicly at the URLs below the selection boxes.
+             
+        The Pearson's r coefficient is a measure of the strength of correlation between two data series. (Note that Pearson's r does *not* tell us the direction of causation between the two datasets or even whether any exists at all, but simply the degree to which the two datasets are correlated.)
+             
+        The value of Pearson's r ranges from a minimum of -1 to a maximum of 1. A value of 1 represents perfect positive correlation while a value of -1 represents perfect negative correlation. A Pearson's r value of 0 indicates that there is no relationship whatsoever between the two datasets.
+             
+        In practice, no two datasets will ever be perfectly correlated or perfectly uncorrelated. Although no exact consensus exists on the threshold of 'strong' correlation, generally a Pearson's r coefficient of 0.6 or above (or -0.6 or below) is considered a strong correlation.
+             
+        An important detail about the Pearson's r metric is that it requires two datasets of exactly equal length. That is, a monthly dataset covering two years cannot be compared to a monthly dataset that covers only one. This presents a challenge given the variety of datasets available here.
+             
+        To acccount for this, I have made two key adjustments to the datasets.
+             
+        First, I only include the data points from *dates in common* between the two datasets being compared. For example, when comparing a monthly dataset with observations from June 2019 to May 2023 with another dataset running from August 2001 to February 2024, I will trim both datasets so they only include observations between August 2001 and May 2023, a period during which both datasets have observations.
+             
+        Secondly, when comparing two datasets whose observations occur at *different cadences* - e.g., one is reported monthly and the other is reported daily - I average the higher-frequency dataset over the lower-frequency cadence. An example of this would be correlating average gas prices (a dataset with daily observations) to consumer sentiment indices (which are generally measured monthly): in this case, I first average the daily gas prices for each month before correlating them with the monthly consumer sentiment index dataset.
+             
+        The data table directly above the line chart represents these *adjusted* datasets. (You can export/download the data to check it yourself and conduct your own analyses.) If you see any errors or bugs, please let me know!
     ''')
+
+html('''
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <a href="https://twitter.com/jaypinho?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @jaypinho</a>
+    <br>
+    <a href="https://www.buymeacoffee.com/tether" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 145px !important;" ></a>
+''')
+
+st.write('''
+    <p>
+        Correlations Explorer is brought to you by <a href="https://twitter.com/jaypinho" target="_blank">Jay Pinho</a>.
+    </p>
+    <p>
+        Previous projects include:
+        <ul>
+            <li><a href="https://transcripts.streamlit.app/" target="_blank">Transcript Accuracy Analyzer</a></li>
+            <li><a href="https://podcast.streamlit.app/" target="_blank">Podcast Summarizer</a></li>
+            <li><a href="https://www.tethertransparency.com/" target="_blank">Tether Insolvency Calculator</a></li>
+            <li><a href="http://www.fedproject.com/" target="_blank">The Fed Project</a></li>
+            <li><a href="https://www.scotusmap.com/" target="_blank">SCOTUS Map</a></li>
+        </ul>
+    </p>
+    <p>
+        Subscribe to <a href="https://networked.substack.com/" target="_blank">my technology and politics newsletter</a>.
+    </p>
+    <p>
+        See any mistakes? <a href="https://twitter.com/jaypinho" target="_blank">Let me know</a>.
+    </p>
+''', unsafe_allow_html=True)
