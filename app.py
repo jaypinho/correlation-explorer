@@ -270,6 +270,7 @@ dataset2_picker = st.selectbox('Pick dataset #2', [x['title'] for x in eligible_
 st.caption(next((x['url'] for x in eligible_datasets if dataset2_picker == x['title']), ''))
 
 dataset_candidates = []
+comparison_cadence = '%Y-%m'
 for dataset_index in [1, 2]:
 
     if dataset_index == 1:
@@ -305,19 +306,41 @@ for dataset_index in [1, 2]:
 
     if revised_dataset is not None and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset1_picker), None) == 'daily' and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset2_picker), None) == 'monthly' and dataset_index == 1:
         dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
+        comparison_cadence = '%Y-%m'
     elif revised_dataset is not None and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset1_picker), None) == 'monthly' and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset2_picker), None) == 'daily' and dataset_index == 2:
         dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
+        comparison_cadence = '%Y-%m'
     elif revised_dataset is not None:
         dataset_candidates.append(revised_dataset)
-
+        comparison_cadence = '%Y-%m-%d'
 
 datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
+
+min_date = sorted(datasets[0], key = lambda x: x['date'])[0]['date']
+max_date = sorted(datasets[0], key = lambda x: x['date'], reverse=True)[0]['date']
+
+min_date = datetime.datetime.strptime(min_date, comparison_cadence)
+max_date = datetime.datetime.strptime(max_date, comparison_cadence)
+
+
+date_filter = st.slider(
+    "Limit observations to a custom date range",
+    value=(min_date, max_date),
+    min_value=min_date,
+    max_value=max_date,
+    format="YYYY-MM-DD"
+)
+
+datasets[0] = [x for x in datasets[0] if datetime.datetime.strptime(x['date'], comparison_cadence) >= date_filter[0] and datetime.datetime.strptime(x['date'], comparison_cadence) <= date_filter[1]]
+datasets[1] = [x for x in datasets[1] if datetime.datetime.strptime(x['date'], comparison_cadence) >= date_filter[0] and datetime.datetime.strptime(x['date'], comparison_cadence) <= date_filter[1]]
 
 if len(datasets[0]) >= 4:
 
     pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] for x in datasets[1]])
 
     st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
+
+    st.metric(label="Observations", value=len(datasets[0]))
 
     dataset1_df = pd.DataFrame(datasets[0])
     dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
