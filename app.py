@@ -6,6 +6,7 @@ import io
 import datetime
 import altair as alt
 from streamlit.components.v1 import html
+st.set_page_config(page_title='Correlation Explorer', layout="wide")
 
 def calculate_pearsons(series1, series2):
     return np.corrcoef(series1, series2)[0, 1]
@@ -378,7 +379,7 @@ with st.expander("See methodology"):
     st.write('''
         Each dataset above is available for free publicly at the URLs below the selection boxes.
              
-        The Pearson's r coefficient is a measure of the strength of correlation between two data series. (Note that Pearson's r does *not* tell us the direction of causation between the two datasets or even whether any exists at all, but simply the degree to which the two datasets are correlated.)
+        The Pearson's r coefficient is a measure of the strength of correlation between two data series. (Note that Pearson's r does *not* tell us the direction of *causation* between the two datasets or even whether any exists at all, but simply the degree to which the two datasets are correlated.)
              
         The value of Pearson's r ranges from a minimum of -1 to a maximum of 1. A value of 1 represents perfect positive correlation while a value of -1 represents perfect negative correlation. A Pearson's r value of 0 indicates that there is no relationship whatsoever between the two datasets.
              
@@ -388,7 +389,7 @@ with st.expander("See methodology"):
              
         To acccount for this, I have made two key adjustments to the datasets.
              
-        First, I only include the data points from *dates in common* between the two datasets being compared. For example, when comparing a monthly dataset with observations from June 2019 to May 2023 with another dataset running from August 2001 to February 2024, I will trim both datasets so they only include observations between August 2001 and May 2023, a period during which both datasets have observations.
+        First, I only include the data points from *dates in common* between the two datasets being compared. For example, when comparing a monthly dataset with observations from June 2019 to May 2023 with another dataset running from August 2001 to February 2024, I will trim both datasets so they only include observations between August 2001 and May 2023, a period during which both datasets have observations. (You can further limit the date range using the slider.)
              
         Secondly, when comparing two datasets whose observations occur at *different cadences* - e.g., one is reported monthly and the other is reported daily - I average the higher-frequency dataset over the lower-frequency cadence. An example of this would be correlating average gas prices (a dataset with daily observations) to consumer sentiment indices (which are generally measured monthly): in this case, I first average the daily gas prices for each month before correlating them with the monthly consumer sentiment index dataset.
              
