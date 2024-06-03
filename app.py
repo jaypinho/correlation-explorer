@@ -231,6 +231,14 @@ def detect_date_strftime_setting(date_string):
         return '%Y-%m-%d'
     elif len(date_string.split('-')) == 2:
         return '%Y-%m'
+    
+# For example, we may want to measure lagging effects, e.g. the effect of the unemployment rate as of 3 months ago (not today) on consumer sentiment today.
+def time_shift_the_data(data, interval, number_of_intervals):
+    strftime_setting = detect_date_strftime_setting(data[0]['date'])
+    if interval == 'days':
+        return [{'date': (datetime.datetime.strptime(x['date'], strftime_setting) + pd.DateOffset(days=number_of_intervals)).strftime(strftime_setting), 'value': x['value']} for x in data]
+    else:
+        return [{'date': (datetime.datetime.strptime(x['date'], strftime_setting) + pd.DateOffset(months=number_of_intervals)).strftime(strftime_setting), 'value': x['value']} for x in data]
 
 # For example, inflation data is represented as a monthly price level number (CPI-U). To calculate inflation, you need to calculate the change in that number over some period of time. 
 def transform_data_into_annual_rate_of_change(data, years_ago=1):
@@ -370,8 +378,13 @@ dataset2_picker = st.selectbox('Pick dataset #2', [x['title'] for x in eligible_
 # st.caption(next((x['description'] for x in eligible_datasets if dataset2_picker == x['title'] and 'description' in x), ''))
 st.caption(next((x['url'] for x in eligible_datasets if dataset2_picker == x['title']), ''))
 
+dataset1 = next((x for x in eligible_datasets if x['title'] == dataset1_picker), None)
+dataset2 = next((x for x in eligible_datasets if x['title'] == dataset2_picker), None)
+comparison_cadence = '%Y-%m' if dataset1['cadence'] != dataset2['cadence'] or dataset1['cadence'] == 'monthly' else '%Y-%m-%d'
+
+dataset2_lag = st.slider(f"Shift each observation in dataset #2 backwards by the below number of {'days' if comparison_cadence == '%Y-%m-%d' else 'months'} before comparing datasets", 0, 365 if comparison_cadence == '%Y-%m-%d' else 12, 0)
+
 dataset_candidates = []
-comparison_cadence = '%Y-%m'
 
 with st.spinner('Loading datasets...'):
     for dataset_index in [1, 2]:
@@ -385,21 +398,21 @@ with st.spinner('Loading datasets...'):
 
         # Monthly indicators
         if dataset_value == 'University of Michigan Index of Consumer Sentiment':
-            dataset_candidates.append(get_umich_data(series='ics'))
+            revised_dataset = get_umich_data(series='ics')
         elif dataset_value == 'University of Michigan Index of Consumer Expectations':
-            dataset_candidates.append(get_umich_data(series='ice'))
+            revised_dataset = get_umich_data(series='ice')
         elif dataset_value == 'University of Michigan Index of Current Economic Conditions':
-            dataset_candidates.append(get_umich_data(series='icc'))
+            revised_dataset = get_umich_data(series='icc')
         elif dataset_value == 'Conference Board Consumer Confidence Index':
-            dataset_candidates.append(get_conference_board_leading_indicators_data(exact_date=False))
+            revised_dataset = get_conference_board_leading_indicators_data(exact_date=False)
         elif dataset_value == 'Bureau of Labor Statistics Annual CPI Inflation Rate':
             # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='inflation'), years_ago=1))
-            dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically(), years_ago=1))
+            revised_dataset = transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically(), years_ago=1)
         elif dataset_value == 'Bureau of Labor Statistics Unemployment Rate':
             # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='unemployment'), years_ago=1))
-            dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_unemployment_data_statically(), years_ago=1))
+            revised_dataset = transform_data_into_annual_rate_of_change(get_bls_unemployment_data_statically(), years_ago=1)
         elif dataset_value == 'U.S. Energy Information Administration Monthly Retail Gas Prices':
-            dataset_candidates.append(get_eia_gas_price_data_statically())
+            revised_dataset = get_eia_gas_price_data_statically()
 
         # Potentially daily indicators
         elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
@@ -415,15 +428,15 @@ with st.spinner('Loading datasets...'):
         elif dataset_value == '538 Joe Biden 2024 Election Polling Average':
             revised_dataset = get_joe_biden_polling_average()
 
-        if revised_dataset is not None and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset1_picker), None) == 'daily' and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset2_picker), None) == 'monthly' and dataset_index == 1:
+        if dataset_index == 2 and dataset2_lag > 0:
+            revised_dataset = time_shift_the_data(revised_dataset, 'days' if comparison_cadence == '%Y-%m-%d' else 'months', dataset2_lag)
+
+        if dataset1['cadence'] == 'daily' and comparison_cadence == '%Y-%m' and dataset_index == 1:
             dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
-            comparison_cadence = '%Y-%m'
-        elif revised_dataset is not None and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset1_picker), None) == 'monthly' and next((x['cadence'] for x in eligible_datasets if x['title'] == dataset2_picker), None) == 'daily' and dataset_index == 2:
+        elif comparison_cadence == '%Y-%m' and dataset2['cadence'] == 'daily' and dataset_index == 2:
             dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
-            comparison_cadence = '%Y-%m'
-        elif revised_dataset is not None:
+        else:
             dataset_candidates.append(revised_dataset)
-            comparison_cadence = '%Y-%m-%d'
 
 datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
 
@@ -503,7 +516,9 @@ with st.expander("See methodology"):
              
         Secondly, when comparing two datasets whose observations occur at *different cadences* - e.g., one is reported monthly and the other is reported daily - I average the higher-frequency dataset over the lower-frequency cadence. An example of this would be correlating average gas prices (a dataset with daily observations) to consumer sentiment indices (which are generally measured monthly): in this case, I first average the daily gas prices for each month before correlating them with the monthly consumer sentiment index dataset.
              
-        The data table directly above the line chart represents these *adjusted* datasets. (You can export/download the data to check it yourself and conduct your own analyses.) If you see any errors or bugs, please let me know!
+        Additionally, you can time-shift the second dataset up to 365 days or 12 months back in time (depending on whether the correlation is being calculated on a daily or monthly basis, respectively). This allows you to measure correlations for lagging indicators: for example, it is possible that today's consumer sentiment correlates more closely with gas prices from 3 months ago rather than their current price right now.
+             
+        The line chart, and the data table directly above it, represent these datasets *after* all of these adjustments are made. (You can export/download the data to check it yourself and conduct your own analyses.) If you see any errors or bugs, please let me know!
     ''')
 
 html('''
