@@ -254,7 +254,7 @@ def transform_data_into_annual_rate_of_change(data, years_ago=1):
 
         list_data.append({
             'date': data_point['date'],
-            'value': (data_point['value'] - matching_data_point['value']) / matching_data_point['value']
+            'value': (data_point['value'] - matching_data_point['value']) / matching_data_point['value'] * 100
         })
     
     return list_data
@@ -410,7 +410,7 @@ with st.spinner('Loading datasets...'):
             revised_dataset = transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically(), years_ago=1)
         elif dataset_value == 'Bureau of Labor Statistics Unemployment Rate':
             # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='unemployment'), years_ago=1))
-            revised_dataset = transform_data_into_annual_rate_of_change(get_bls_unemployment_data_statically(), years_ago=1)
+            revised_dataset = get_bls_unemployment_data_statically()
         elif dataset_value == 'U.S. Energy Information Administration Monthly Retail Gas Prices':
             revised_dataset = get_eia_gas_price_data_statically()
 
