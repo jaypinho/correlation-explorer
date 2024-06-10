@@ -206,6 +206,17 @@ def get_eia_gas_price_data_statically():
 
     return [{'date': '1991-02', 'value': 1.094}, {'date': '1991-03', 'value': 1.04}, {'date': '1991-04', 'value': 1.076}, {'date': '1991-05', 'value': 1.126}, {'date': '1991-06', 'value': 1.128}, {'date': '1991-07', 'value': 1.096}, {'date': '1991-08', 'value': 1.115}, {'date': '1991-09', 'value': 1.109}, {'date': '1991-10', 'value': 1.088}, {'date': '1991-11', 'value': 1.099}, {'date': '1991-12', 'value': 1.076}, {'date': '1992-01', 'value': 1.022}, {'date': '1992-02', 'value': 1.006}, {'date': '1992-03', 'value': 1.013}, {'date': '1992-04', 'value': 1.052}, {'date': '1992-05', 'value': 1.107}, {'date': '1992-06', 'value': 1.145}, {'date': '1992-07', 'value': 1.137}, {'date': '1992-08', 'value': 1.122}, {'date': '1992-09', 'value': 1.122}, {'date': '1992-10', 'value': 1.114}, {'date': '1992-11', 'value': 1.111}, {'date': '1992-12', 'value': 1.078}, {'date': '1993-01', 'value': 1.062}, {'date': '1993-02', 'value': 1.054}, {'date': '1993-03', 'value': 1.052}, {'date': '1993-04', 'value': 1.078}, {'date': '1993-05', 'value': 1.1}, {'date': '1993-06', 'value': 1.097}, {'date': '1993-07', 'value': 1.078}, {'date': '1993-08', 'value': 1.062}, {'date': '1993-09', 'value': 1.05}, {'date': '1993-10', 'value': 1.092}, {'date': '1993-11', 'value': 1.066}, {'date': '1993-12', 'value': 1.014}, {'date': '1994-01', 'value': 0.998}, {'date': '1994-02', 'value': 1.009}, {'date': '1994-03', 'value': 1.008}, {'date': '1994-04', 'value': 1.027}, {'date': '1994-05', 'value': 1.047}, {'date': '1994-06', 'value': 1.078}, {'date': '1994-07', 'value': 1.106}, {'date': '1994-08', 'value': 1.155}, {'date': '1994-09', 'value': 1.144}, {'date': '1994-10', 'value': 1.114}, {'date': '1994-11', 'value': 1.116}, {'date': '1994-12', 'value': 1.091}, {'date': '1995-01', 'value': 1.082}, {'date': '1995-02', 'value': 1.073}, {'date': '1995-03', 'value': 1.072}, {'date': '1995-04', 'value': 1.111}, {'date': '1995-05', 'value': 1.178}, {'date': '1995-06', 'value': 1.192}, {'date': '1995-07', 'value': 1.154}, {'date': '1995-08', 'value': 1.123}, {'date': '1995-09', 'value': 1.111}, {'date': '1995-10', 'value': 1.087}, {'date': '1995-11', 'value': 1.062}, {'date': '1995-12', 'value': 1.071}, {'date': '1996-01', 'value': 1.09}, {'date': '1996-02', 'value': 1.089}, {'date': '1996-03', 'value': 1.137}, {'date': '1996-04', 'value': 1.231}, {'date': '1996-05', 'value': 1.279}, {'date': '1996-06', 'value': 1.256}, {'date': '1996-07', 'value': 1.227}, {'date': '1996-08', 'value': 1.207}, {'date': '1996-09', 'value': 1.202}, {'date': '1996-10', 'value': 1.204}, {'date': '1996-11', 'value': 1.232}, {'date': '1996-12', 'value': 1.235}, {'date': '1997-01', 'value': 1.236}, {'date': '1997-02', 'value': 1.23}, {'date': '1997-03', 'value': 1.205}, {'date': '1997-04', 'value': 1.199}, {'date': '1997-05', 'value': 1.2}, {'date': '1997-06', 'value': 1.198}, {'date': '1997-07', 'value': 1.174}, {'date': '1997-08', 'value': 1.224}, {'date': '1997-09', 'value': 1.231}, {'date': '1997-10', 'value': 1.197}, {'date': '1997-11', 'value': 1.171}, {'date': '1997-12', 'value': 1.131}, {'date': '1998-01', 'value': 1.086}, {'date': '1998-02', 'value': 1.049}, {'date': '1998-03', 'value': 1.017}, {'date': '1998-04', 'value': 1.03}, {'date': '1998-05', 'value': 1.064}, {'date': '1998-06', 'value': 1.064}, {'date': '1998-07', 'value': 1.055}, {'date': '1998-08', 'value': 1.026}, {'date': '1998-09', 'value': 1.009}, {'date': '1998-10', 'value': 1.019}, {'date': '1998-11', 'value': 0.995}, {'date': '1998-12', 'value': 0.945}, {'date': '1999-01', 'value': 0.939}, {'date': '1999-02', 'value': 0.921}, {'date': '1999-03', 'value': 0.982}, {'date': '1999-04', 'value': 1.131}, {'date': '1999-05', 'value': 1.131}, {'date': '1999-06', 'value': 1.114}, {'date': '1999-07', 'value': 1.158}, {'date': '1999-08', 'value': 1.221}, {'date': '1999-09', 'value': 1.256}, {'date': '1999-10', 'value': 1.244}, {'date': '1999-11', 'value': 1.251}, {'date': '1999-12', 'value': 1.273}, {'date': '2000-01', 'value': 1.289}, {'date': '2000-02', 'value': 1.377}, {'date': '2000-03', 'value': 1.516}, {'date': '2000-04', 'value': 1.465}, {'date': '2000-05', 'value': 1.487}, {'date': '2000-06', 'value': 1.633}, {'date': '2000-07', 'value': 1.551}, {'date': '2000-08', 'value': 1.465}, {'date': '2000-09', 'value': 1.55}, {'date': '2000-10', 'value': 1.532}, {'date': '2000-11', 'value': 1.517}, {'date': '2000-12', 'value': 1.443}, {'date': '2001-01', 'value': 1.447}, {'date': '2001-02', 'value': 1.45}, {'date': '2001-03', 'value': 1.409}, {'date': '2001-04', 'value': 1.552}, {'date': '2001-05', 'value': 1.702}, {'date': '2001-06', 'value': 1.616}, {'date': '2001-07', 'value': 1.421}, {'date': '2001-08', 'value': 1.421}, {'date': '2001-09', 'value': 1.522}, {'date': '2001-10', 'value': 1.315}, {'date': '2001-11', 'value': 1.171}, {'date': '2001-12', 'value': 1.086}, {'date': '2002-01', 'value': 1.107}, {'date': '2002-02', 'value': 1.114}, {'date': '2002-03', 'value': 1.249}, {'date': '2002-04', 'value': 1.397}, {'date': '2002-05', 'value': 1.392}, {'date': '2002-06', 'value': 1.382}, {'date': '2002-07', 'value': 1.397}, {'date': '2002-08', 'value': 1.396}, {'date': '2002-09', 'value': 1.4}, {'date': '2002-10', 'value': 1.445}, {'date': '2002-11', 'value': 1.419}, {'date': '2002-12', 'value': 1.386}, {'date': '2003-01', 'value': 1.458}, {'date': '2003-02', 'value': 1.613}, {'date': '2003-03', 'value': 1.693}, {'date': '2003-04', 'value': 1.589}, {'date': '2003-05', 'value': 1.497}, {'date': '2003-06', 'value': 1.493}, {'date': '2003-07', 'value': 1.513}, {'date': '2003-08', 'value': 1.62}, {'date': '2003-09', 'value': 1.679}, {'date': '2003-10', 'value': 1.564}, {'date': '2003-11', 'value': 1.512}, {'date': '2003-12', 'value': 1.479}, {'date': '2004-01', 'value': 1.572}, {'date': '2004-02', 'value': 1.648}, {'date': '2004-03', 'value': 1.736}, {'date': '2004-04', 'value': 1.798}, {'date': '2004-05', 'value': 1.983}, {'date': '2004-06', 'value': 1.969}, {'date': '2004-07', 'value': 1.911}, {'date': '2004-08', 'value': 1.878}, {'date': '2004-09', 'value': 1.87}, {'date': '2004-10', 'value': 2.0}, {'date': '2004-11', 'value': 1.979}, {'date': '2004-12', 'value': 1.841}, {'date': '2005-01', 'value': 1.831}, {'date': '2005-02', 'value': 1.91}, {'date': '2005-03', 'value': 2.079}, {'date': '2005-04', 'value': 2.243}, {'date': '2005-05', 'value': 2.161}, {'date': '2005-06', 'value': 2.156}, {'date': '2005-07', 'value': 2.29}, {'date': '2005-08', 'value': 2.486}, {'date': '2005-09', 'value': 2.903}, {'date': '2005-10', 'value': 2.717}, {'date': '2005-11', 'value': 2.257}, {'date': '2005-12', 'value': 2.185}, {'date': '2006-01', 'value': 2.316}, {'date': '2006-02', 'value': 2.28}, {'date': '2006-03', 'value': 2.425}, {'date': '2006-04', 'value': 2.742}, {'date': '2006-05', 'value': 2.907}, {'date': '2006-06', 'value': 2.885}, {'date': '2006-07', 'value': 2.981}, {'date': '2006-08', 'value': 2.952}, {'date': '2006-09', 'value': 2.555}, {'date': '2006-10', 'value': 2.245}, {'date': '2006-11', 'value': 2.229}, {'date': '2006-12', 'value': 2.313}, {'date': '2007-01', 'value': 2.24}, {'date': '2007-02', 'value': 2.278}, {'date': '2007-03', 'value': 2.563}, {'date': '2007-04', 'value': 2.845}, {'date': '2007-05', 'value': 3.146}, {'date': '2007-06', 'value': 3.056}, {'date': '2007-07', 'value': 2.965}, {'date': '2007-08', 'value': 2.786}, {'date': '2007-09', 'value': 2.803}, {'date': '2007-10', 'value': 2.803}, {'date': '2007-11', 'value': 3.08}, {'date': '2007-12', 'value': 3.018}, {'date': '2008-01', 'value': 3.043}, {'date': '2008-02', 'value': 3.028}, {'date': '2008-03', 'value': 3.244}, {'date': '2008-04', 'value': 3.458}, {'date': '2008-05', 'value': 3.766}, {'date': '2008-06', 'value': 4.054}, {'date': '2008-07', 'value': 4.062}, {'date': '2008-08', 'value': 3.779}, {'date': '2008-09', 'value': 3.703}, {'date': '2008-10', 'value': 3.051}, {'date': '2008-11', 'value': 2.147}, {'date': '2008-12', 'value': 1.687}, {'date': '2009-01', 'value': 1.788}, {'date': '2009-02', 'value': 1.923}, {'date': '2009-03', 'value': 1.959}, {'date': '2009-04', 'value': 2.049}, {'date': '2009-05', 'value': 2.266}, {'date': '2009-06', 'value': 2.631}, {'date': '2009-07', 'value': 2.527}, {'date': '2009-08', 'value': 2.616}, {'date': '2009-09', 'value': 2.554}, {'date': '2009-10', 'value': 2.551}, {'date': '2009-11', 'value': 2.651}, {'date': '2009-12', 'value': 2.607}, {'date': '2010-01', 'value': 2.715}, {'date': '2010-02', 'value': 2.644}, {'date': '2010-03', 'value': 2.772}, {'date': '2010-04', 'value': 2.848}, {'date': '2010-05', 'value': 2.836}, {'date': '2010-06', 'value': 2.732}, {'date': '2010-07', 'value': 2.729}, {'date': '2010-08', 'value': 2.73}, {'date': '2010-09', 'value': 2.705}, {'date': '2010-10', 'value': 2.801}, {'date': '2010-11', 'value': 2.859}, {'date': '2010-12', 'value': 2.993}, {'date': '2011-01', 'value': 3.095}, {'date': '2011-02', 'value': 3.211}, {'date': '2011-03', 'value': 3.561}, {'date': '2011-04', 'value': 3.8}, {'date': '2011-05', 'value': 3.906}, {'date': '2011-06', 'value': 3.68}, {'date': '2011-07', 'value': 3.65}, {'date': '2011-08', 'value': 3.639}, {'date': '2011-09', 'value': 3.611}, {'date': '2011-10', 'value': 3.448}, {'date': '2011-11', 'value': 3.384}, {'date': '2011-12', 'value': 3.266}, {'date': '2012-01', 'value': 3.38}, {'date': '2012-02', 'value': 3.579}, {'date': '2012-03', 'value': 3.852}, {'date': '2012-04', 'value': 3.9}, {'date': '2012-05', 'value': 3.732}, {'date': '2012-06', 'value': 3.539}, {'date': '2012-07', 'value': 3.439}, {'date': '2012-08', 'value': 3.722}, {'date': '2012-09', 'value': 3.849}, {'date': '2012-10', 'value': 3.746}, {'date': '2012-11', 'value': 3.452}, {'date': '2012-12', 'value': 3.31}, {'date': '2013-01', 'value': 3.319}, {'date': '2013-02', 'value': 3.67}, {'date': '2013-03', 'value': 3.711}, {'date': '2013-04', 'value': 3.57}, {'date': '2013-05', 'value': 3.615}, {'date': '2013-06', 'value': 3.626}, {'date': '2013-07', 'value': 3.591}, {'date': '2013-08', 'value': 3.574}, {'date': '2013-09', 'value': 3.532}, {'date': '2013-10', 'value': 3.344}, {'date': '2013-11', 'value': 3.243}, {'date': '2013-12', 'value': 3.276}, {'date': '2014-01', 'value': 3.313}, {'date': '2014-02', 'value': 3.356}, {'date': '2014-03', 'value': 3.533}, {'date': '2014-04', 'value': 3.661}, {'date': '2014-05', 'value': 3.673}, {'date': '2014-06', 'value': 3.692}, {'date': '2014-07', 'value': 3.611}, {'date': '2014-08', 'value': 3.487}, {'date': '2014-09', 'value': 3.406}, {'date': '2014-10', 'value': 3.171}, {'date': '2014-11', 'value': 2.912}, {'date': '2014-12', 'value': 2.543}, {'date': '2015-01', 'value': 2.116}, {'date': '2015-02', 'value': 2.216}, {'date': '2015-03', 'value': 2.464}, {'date': '2015-04', 'value': 2.469}, {'date': '2015-05', 'value': 2.718}, {'date': '2015-06', 'value': 2.802}, {'date': '2015-07', 'value': 2.794}, {'date': '2015-08', 'value': 2.636}, {'date': '2015-09', 'value': 2.365}, {'date': '2015-10', 'value': 2.29}, {'date': '2015-11', 'value': 2.158}, {'date': '2015-12', 'value': 2.038}, {'date': '2016-01', 'value': 1.949}, {'date': '2016-02', 'value': 1.764}, {'date': '2016-03', 'value': 1.969}, {'date': '2016-04', 'value': 2.113}, {'date': '2016-05', 'value': 2.268}, {'date': '2016-06', 'value': 2.366}, {'date': '2016-07', 'value': 2.239}, {'date': '2016-08', 'value': 2.178}, {'date': '2016-09', 'value': 2.219}, {'date': '2016-10', 'value': 2.249}, {'date': '2016-11', 'value': 2.182}, {'date': '2016-12', 'value': 2.254}, {'date': '2017-01', 'value': 2.349}, {'date': '2017-02', 'value': 2.304}, {'date': '2017-03', 'value': 2.325}, {'date': '2017-04', 'value': 2.417}, {'date': '2017-05', 'value': 2.391}, {'date': '2017-06', 'value': 2.347}, {'date': '2017-07', 'value': 2.3}, {'date': '2017-08', 'value': 2.38}, {'date': '2017-09', 'value': 2.645}, {'date': '2017-10', 'value': 2.505}, {'date': '2017-11', 'value': 2.564}, {'date': '2017-12', 'value': 2.477}, {'date': '2018-01', 'value': 2.555}, {'date': '2018-02', 'value': 2.587}, {'date': '2018-03', 'value': 2.591}, {'date': '2018-04', 'value': 2.757}, {'date': '2018-05', 'value': 2.901}, {'date': '2018-06', 'value': 2.891}, {'date': '2018-07', 'value': 2.849}, {'date': '2018-08', 'value': 2.836}, {'date': '2018-09', 'value': 2.836}, {'date': '2018-10', 'value': 2.86}, {'date': '2018-11', 'value': 2.647}, {'date': '2018-12', 'value': 2.366}, {'date': '2019-01', 'value': 2.248}, {'date': '2019-02', 'value': 2.309}, {'date': '2019-03', 'value': 2.516}, {'date': '2019-04', 'value': 2.798}, {'date': '2019-05', 'value': 2.859}, {'date': '2019-06', 'value': 2.716}, {'date': '2019-07', 'value': 2.74}, {'date': '2019-08', 'value': 2.621}, {'date': '2019-09', 'value': 2.592}, {'date': '2019-10', 'value': 2.627}, {'date': '2019-11', 'value': 2.598}, {'date': '2019-12', 'value': 2.555}, {'date': '2020-01', 'value': 2.548}, {'date': '2020-02', 'value': 2.442}, {'date': '2020-03', 'value': 2.234}, {'date': '2020-04', 'value': 1.841}, {'date': '2020-05', 'value': 1.87}, {'date': '2020-06', 'value': 2.082}, {'date': '2020-07', 'value': 2.183}, {'date': '2020-08', 'value': 2.182}, {'date': '2020-09', 'value': 2.183}, {'date': '2020-10', 'value': 2.158}, {'date': '2020-11', 'value': 2.108}, {'date': '2020-12', 'value': 2.195}, {'date': '2021-01', 'value': 2.334}, {'date': '2021-02', 'value': 2.501}, {'date': '2021-03', 'value': 2.81}, {'date': '2021-04', 'value': 2.858}, {'date': '2021-05', 'value': 2.985}, {'date': '2021-06', 'value': 3.064}, {'date': '2021-07', 'value': 3.136}, {'date': '2021-08', 'value': 3.158}, {'date': '2021-09', 'value': 3.175}, {'date': '2021-10', 'value': 3.291}, {'date': '2021-11', 'value': 3.395}, {'date': '2021-12', 'value': 3.307}, {'date': '2022-01', 'value': 3.315}, {'date': '2022-02', 'value': 3.517}, {'date': '2022-03', 'value': 4.222}, {'date': '2022-04', 'value': 4.109}, {'date': '2022-05', 'value': 4.444}, {'date': '2022-06', 'value': 4.929}, {'date': '2022-07', 'value': 4.559}, {'date': '2022-08', 'value': 3.975}, {'date': '2022-09', 'value': 3.7}, {'date': '2022-10', 'value': 3.815}, {'date': '2022-11', 'value': 3.685}, {'date': '2022-12', 'value': 3.21}, {'date': '2023-01', 'value': 3.339}, {'date': '2023-02', 'value': 3.389}, {'date': '2023-03', 'value': 3.422}, {'date': '2023-04', 'value': 3.603}, {'date': '2023-05', 'value': 3.555}, {'date': '2023-06', 'value': 3.571}, {'date': '2023-07', 'value': 3.597}, {'date': '2023-08', 'value': 3.84}, {'date': '2023-09', 'value': 3.836}, {'date': '2023-10', 'value': 3.613}, {'date': '2023-11', 'value': 3.318}, {'date': '2023-12', 'value': 3.134}, {'date': '2024-01', 'value': 3.075}, {'date': '2024-02', 'value': 3.212}, {'date': '2024-03', 'value': 3.426}, {'date': '2024-04', 'value': 3.611}, {'date': '2024-05', 'value': 3.603}]
 
+def get_predictit_prices():
+    response = requests.get('https://www.predictit.org/api/Public/GetMarketChartData/7456?timespan=90&maxContracts=6&isTimespanInHours=false').json()
+    cleaned_up_response = [{'date': x['dateString'], 'value': x['closeSharePrice']} for x in response if x['contractName'] == 'Biden']
+    return cleaned_up_response
+
+def get_fed_funds_rate_data():
+
+    fed_funds = requests.get(f'https://api.stlouisfed.org/fred/series/observations?series_id=FEDFUNDS&api_key={os.environ.get("FRED_API_KEY")}&file_type=json').json()
+    list_data = [{'date': "-".join(x['date'].split("-")[:-1]), 'value': float(x['value']) } for x in fed_funds['observations']]
+    return list_data
+
 # For example, FRBSF measures news sentiment daily, but we may want to average all values in a month if the dependent variable we're testing against (e.g. UMich consumer sentiment) is only available monthly.
 def average_daily_data_over_interval(data, strftime_interval):
     
@@ -287,265 +298,286 @@ def isfloat(num):
         return False
 
 
-eligible_datasets = [
-    {
-        'title': 'University of Michigan Index of Consumer Sentiment',
-        'short_title': 'UMich Consumer Sentiment',
-        'url': 'http://www.sca.isr.umich.edu/',
-        'cadence': 'monthly'
-        # 'description': 'The Index of Consumer Sentiment'
-    },
-    {
-        'title': 'University of Michigan Index of Consumer Expectations',
-        'short_title': 'UMich Consumer Expectations',
-        'url': 'http://www.sca.isr.umich.edu/',
-        'cadence': 'monthly'
-    },
-    {
-        'title': 'University of Michigan Index of Current Economic Conditions',
-        'short_title': 'UMich Current Economic Conditions',
-        'url': 'http://www.sca.isr.umich.edu/',
-        'cadence': 'monthly'
-    },
-    {
-        'title': 'Conference Board Consumer Confidence Index',
-        'short_title': 'Conf. Board Consumer Confidence',
-        'url': 'https://www.conference-board.org/topics/consumer-confidence',
-        'cadence': 'monthly'
-    },
-    {
-        'title': 'Civiqs National Economy Current Condition - Net Good',
-        'short_title': 'Civiqs Economic Sentiment',
-        'url': 'https://civiqs.com/results/economy_us_now?uncertainty=true&annotations=true&zoomIn=true&net=true',
-        'cadence': 'daily'
-    },
-    {
-        'title': 'A Democrat is President of the United States',
-        'short_title': 'Democrat is U.S. President',
-        'url': 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States',
-        'cadence': 'daily'
-    },
-    {
-        'title': 'Federal Reserve Bank of San Francisco Daily News Sentiment Index',
-        'short_title': 'FRBSF Daily News Sentiment',
-        'url': 'https://www.frbsf.org/research-and-insights/data-and-indicators/daily-news-sentiment-index/',
-        'cadence': 'daily'
-    },
-    # {
-    #     'title': 'GasBuddy Daily National Gas Prices',
-    #     'short_title': 'National Gas Prices',
-    #     'url': 'https://fuelinsights.gasbuddy.com/charts',
-    #     'cadence': 'daily'
-    # },
-    {
-        'title': 'Civiqs Joe Biden Job Approval - Net Approve',
-        'short_title': 'Civiqs Joe Biden Job Approval',
-        'url': 'https://civiqs.com/results/approve_president_biden?uncertainty=true&annotations=true&zoomIn=true&net=true',
-        'cadence': 'daily'
-    },
-    {
-        'title': '538 Joe Biden 2024 Election Polling Average',
-        'short_title': 'Biden 2024 Polling Avg',
-        'url': 'https://projects.fivethirtyeight.com/polls/president-general/2024/national/',
-        'cadence': 'daily'
-    },
-    {
-        'title': 'Bureau of Labor Statistics Annual CPI Inflation Rate',
-        'short_title': 'Inflation Rate',
-        'url': 'https://data.bls.gov/cgi-bin/surveymost?cu',
-        'cadence': 'monthly'
-    },
-    {
-        'title': 'Bureau of Labor Statistics Unemployment Rate',
-        'short_title': 'Unemployment Rate',
-        'url': 'https://data.bls.gov/cgi-bin/surveymost?ln',
-        'cadence': 'monthly'
-    },
-    {
-        'title': 'U.S. Energy Information Administration Monthly Retail Gas Prices',
-        'short_title': 'National Gas Prices',
-        'url': 'https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=PET&s=EMM_EPMR_PTE_NUS_DPG&f=M',
-        'cadence': 'monthly'
-    }
-]
+def run_app():
 
-st.header("Correlation Explorer")
+    eligible_datasets = [
+        {
+            'title': 'University of Michigan Index of Consumer Sentiment',
+            'short_title': 'UMich Consumer Sentiment',
+            'url': 'http://www.sca.isr.umich.edu/',
+            'cadence': 'monthly'
+            # 'description': 'The Index of Consumer Sentiment'
+        },
+        {
+            'title': 'University of Michigan Index of Consumer Expectations',
+            'short_title': 'UMich Consumer Expectations',
+            'url': 'http://www.sca.isr.umich.edu/',
+            'cadence': 'monthly'
+        },
+        {
+            'title': 'University of Michigan Index of Current Economic Conditions',
+            'short_title': 'UMich Current Economic Conditions',
+            'url': 'http://www.sca.isr.umich.edu/',
+            'cadence': 'monthly'
+        },
+        {
+            'title': 'Conference Board Consumer Confidence Index',
+            'short_title': 'Conf. Board Consumer Confidence',
+            'url': 'https://www.conference-board.org/topics/consumer-confidence',
+            'cadence': 'monthly'
+        },
+        {
+            'title': 'Civiqs National Economy Current Condition - Net Good',
+            'short_title': 'Civiqs Economic Sentiment',
+            'url': 'https://civiqs.com/results/economy_us_now?uncertainty=true&annotations=true&zoomIn=true&net=true',
+            'cadence': 'daily'
+        },
+        {
+            'title': 'A Democrat is President of the United States',
+            'short_title': 'Democrat is U.S. President',
+            'url': 'https://en.wikipedia.org/wiki/List_of_presidents_of_the_United_States',
+            'cadence': 'daily'
+        },
+        {
+            'title': 'Federal Reserve Bank of San Francisco Daily News Sentiment Index',
+            'short_title': 'FRBSF Daily News Sentiment',
+            'url': 'https://www.frbsf.org/research-and-insights/data-and-indicators/daily-news-sentiment-index/',
+            'cadence': 'daily'
+        },
+        # {
+        #     'title': 'GasBuddy Daily National Gas Prices',
+        #     'short_title': 'National Gas Prices',
+        #     'url': 'https://fuelinsights.gasbuddy.com/charts',
+        #     'cadence': 'daily'
+        # },
+        {
+            'title': 'Civiqs Joe Biden Job Approval - Net Approve',
+            'short_title': 'Civiqs Joe Biden Job Approval',
+            'url': 'https://civiqs.com/results/approve_president_biden?uncertainty=true&annotations=true&zoomIn=true&net=true',
+            'cadence': 'daily'
+        },
+        {
+            'title': '538 Joe Biden 2024 Election Polling Average',
+            'short_title': 'Biden 2024 Polling Avg',
+            'url': 'https://projects.fivethirtyeight.com/polls/president-general/2024/national/',
+            'cadence': 'daily'
+        },
+        {
+            'title': 'Bureau of Labor Statistics Annual CPI Inflation Rate',
+            'short_title': 'Inflation Rate',
+            'url': 'https://data.bls.gov/cgi-bin/surveymost?cu',
+            'cadence': 'monthly'
+        },
+        {
+            'title': 'Bureau of Labor Statistics Unemployment Rate',
+            'short_title': 'Unemployment Rate',
+            'url': 'https://data.bls.gov/cgi-bin/surveymost?ln',
+            'cadence': 'monthly'
+        },
+        {
+            'title': 'U.S. Energy Information Administration Monthly Retail Gas Prices',
+            'short_title': 'National Gas Prices',
+            'url': 'https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=PET&s=EMM_EPMR_PTE_NUS_DPG&f=M',
+            'cadence': 'monthly'
+        },
+        {
+            'title': 'PredictIt Odds of Biden 2024 Victory',
+            'short_title': 'PredictIt Biden Odds',
+            'url': 'https://www.predictit.org/markets/detail/7456/Who-will-win-the-2024-US-presidential-election',
+            'cadence': 'daily'
+        },
+        {
+            'title': 'Federal Funds Effective Rate',
+            'short_title': 'Fed Funds Rate',
+            'url': 'https://fred.stlouisfed.org/series/FEDFUNDS',
+            'cadence': 'monthly'
+        }
+    ]
 
-dataset1_picker = st.selectbox('Pick dataset #1', [x['title'] for x in eligible_datasets], index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
-# st.caption(next((x['description'] for x in eligible_datasets if dataset1_picker == x['title'] and 'description' in x), ''))
-st.caption(next((x['url'] for x in eligible_datasets if dataset1_picker == x['title']), ''))
-dataset2_picker = st.selectbox('Pick dataset #2', [x['title'] for x in eligible_datasets], index=3, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
-# st.caption(next((x['description'] for x in eligible_datasets if dataset2_picker == x['title'] and 'description' in x), ''))
-st.caption(next((x['url'] for x in eligible_datasets if dataset2_picker == x['title']), ''))
+    st.header("Correlation Explorer")
 
-dataset1 = next((x for x in eligible_datasets if x['title'] == dataset1_picker), None)
-dataset2 = next((x for x in eligible_datasets if x['title'] == dataset2_picker), None)
-comparison_cadence = '%Y-%m' if dataset1['cadence'] != dataset2['cadence'] or dataset1['cadence'] == 'monthly' else '%Y-%m-%d'
+    dataset1_picker = st.selectbox('Pick dataset #1', [x['title'] for x in eligible_datasets], index=0, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
+    # st.caption(next((x['description'] for x in eligible_datasets if dataset1_picker == x['title'] and 'description' in x), ''))
+    st.caption(next((x['url'] for x in eligible_datasets if dataset1_picker == x['title']), ''))
+    dataset2_picker = st.selectbox('Pick dataset #2', [x['title'] for x in eligible_datasets], index=3, key=None, help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
+    # st.caption(next((x['description'] for x in eligible_datasets if dataset2_picker == x['title'] and 'description' in x), ''))
+    st.caption(next((x['url'] for x in eligible_datasets if dataset2_picker == x['title']), ''))
 
-dataset2_lag = st.slider(f"Shift each observation in dataset #2 backwards by the below number of {'days' if comparison_cadence == '%Y-%m-%d' else 'months'} before comparing datasets", 0, 365 if comparison_cadence == '%Y-%m-%d' else 12, 0)
+    dataset1 = next((x for x in eligible_datasets if x['title'] == dataset1_picker), None)
+    dataset2 = next((x for x in eligible_datasets if x['title'] == dataset2_picker), None)
+    comparison_cadence = '%Y-%m' if dataset1['cadence'] != dataset2['cadence'] or dataset1['cadence'] == 'monthly' else '%Y-%m-%d'
 
-dataset_candidates = []
+    dataset2_lag = st.slider(f"Shift each observation in dataset #2 backwards by the below number of {'days' if comparison_cadence == '%Y-%m-%d' else 'months'} before comparing datasets (see methodology section below)", 0, 365 if comparison_cadence == '%Y-%m-%d' else 12, 0)
 
-with st.spinner('Loading datasets...'):
-    for dataset_index in [1, 2]:
+    dataset_candidates = []
 
-        if dataset_index == 1:
-            dataset_value = dataset1_picker
+    with st.spinner('Loading datasets...'):
+        for dataset_index in [1, 2]:
+
+            if dataset_index == 1:
+                dataset_value = dataset1_picker
+            else:
+                dataset_value = dataset2_picker
+
+            revised_dataset = None
+
+            # Monthly indicators
+            if dataset_value == 'University of Michigan Index of Consumer Sentiment':
+                revised_dataset = get_umich_data(series='ics')
+            elif dataset_value == 'University of Michigan Index of Consumer Expectations':
+                revised_dataset = get_umich_data(series='ice')
+            elif dataset_value == 'University of Michigan Index of Current Economic Conditions':
+                revised_dataset = get_umich_data(series='icc')
+            elif dataset_value == 'Conference Board Consumer Confidence Index':
+                revised_dataset = get_conference_board_leading_indicators_data(exact_date=False)
+            elif dataset_value == 'Bureau of Labor Statistics Annual CPI Inflation Rate':
+                # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='inflation'), years_ago=1))
+                revised_dataset = transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically(), years_ago=1)
+            elif dataset_value == 'Bureau of Labor Statistics Unemployment Rate':
+                # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='unemployment'), years_ago=1))
+                revised_dataset = get_bls_unemployment_data_statically()
+            elif dataset_value == 'U.S. Energy Information Administration Monthly Retail Gas Prices':
+                revised_dataset = get_eia_gas_price_data_statically()
+            elif dataset_value == 'Federal Funds Effective Rate':
+                revised_dataset = get_fed_funds_rate_data()
+
+            # Potentially daily indicators
+            elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
+                revised_dataset = get_civiqs_sentiment_data()
+            elif dataset_value == 'A Democrat is President of the United States':
+                revised_dataset = get_democrat_in_white_house_data()
+            elif dataset_value == 'Federal Reserve Bank of San Francisco Daily News Sentiment Index':
+                revised_dataset = get_frb_news_sentiment_data()
+            # elif dataset_value == 'GasBuddy Daily National Gas Prices':
+            #     revised_dataset = get_gasbuddy_prices()
+            elif dataset_value == 'Civiqs Joe Biden Job Approval - Net Approve':
+                revised_dataset = get_civiqs_biden_job_approval_data()
+            elif dataset_value == '538 Joe Biden 2024 Election Polling Average':
+                revised_dataset = get_joe_biden_polling_average()
+            elif dataset_value == 'PredictIt Odds of Biden 2024 Victory':
+                revised_dataset = get_predictit_prices()
+
+            if dataset_index == 2 and dataset2_lag > 0:
+                revised_dataset = time_shift_the_data(revised_dataset, 'days' if comparison_cadence == '%Y-%m-%d' else 'months', dataset2_lag)
+
+            if dataset1['cadence'] == 'daily' and comparison_cadence == '%Y-%m' and dataset_index == 1:
+                dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
+            elif comparison_cadence == '%Y-%m' and dataset2['cadence'] == 'daily' and dataset_index == 2:
+                dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
+            else:
+                dataset_candidates.append(revised_dataset)
+
+    datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
+
+    min_date = sorted(datasets[0], key = lambda x: x['date'])[0]['date']
+    max_date = sorted(datasets[0], key = lambda x: x['date'], reverse=True)[0]['date']
+
+    min_date = datetime.datetime.strptime(min_date, comparison_cadence)
+    max_date = datetime.datetime.strptime(max_date, comparison_cadence)
+
+
+    date_filter = st.slider(
+        "Limit observations to a custom date range",
+        value=(min_date, max_date),
+        min_value=min_date,
+        max_value=max_date,
+        format="YYYY-MM-DD"
+    )
+
+    datasets[0] = [x for x in datasets[0] if datetime.datetime.strptime(x['date'], comparison_cadence) >= date_filter[0] and datetime.datetime.strptime(x['date'], comparison_cadence) <= date_filter[1]]
+    datasets[1] = [x for x in datasets[1] if datetime.datetime.strptime(x['date'], comparison_cadence) >= date_filter[0] and datetime.datetime.strptime(x['date'], comparison_cadence) <= date_filter[1]]
+
+    if len(datasets[0]) >= 4:
+
+        pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] for x in datasets[1]])
+
+        st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
+
+        st.metric(label="Observations", value=len(datasets[0]))
+
+        dataset1_df = pd.DataFrame(datasets[0])
+        dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
+        dataset2_df = pd.DataFrame(datasets[1])
+        dataset2_df = dataset2_df.rename(columns={"value": 'data2'})
+
+        chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
+
+        if dataset1_picker != dataset2_picker:
+            table_df = chart_df.rename(columns={'data1': dataset1_picker, 'data2': dataset2_picker})
+            table_df = table_df[['date', dataset1_picker, dataset2_picker]]
         else:
-            dataset_value = dataset2_picker
+            table_df = chart_df.rename(columns={'data1': f'1 - {dataset1_picker}', 'data2': f'2 - {dataset2_picker}'})
+            table_df = table_df[['date', f'1 - {dataset1_picker}', f'2 - {dataset2_picker}']]
 
-        revised_dataset = None
+        dataset1_short_title = next((x['short_title'] for x in eligible_datasets if dataset1_picker == x['title']), None)
+        dataset2_short_title = next((x['short_title'] for x in eligible_datasets if dataset2_picker == x['title']), None)
 
-        # Monthly indicators
-        if dataset_value == 'University of Michigan Index of Consumer Sentiment':
-            revised_dataset = get_umich_data(series='ics')
-        elif dataset_value == 'University of Michigan Index of Consumer Expectations':
-            revised_dataset = get_umich_data(series='ice')
-        elif dataset_value == 'University of Michigan Index of Current Economic Conditions':
-            revised_dataset = get_umich_data(series='icc')
-        elif dataset_value == 'Conference Board Consumer Confidence Index':
-            revised_dataset = get_conference_board_leading_indicators_data(exact_date=False)
-        elif dataset_value == 'Bureau of Labor Statistics Annual CPI Inflation Rate':
-            # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='inflation'), years_ago=1))
-            revised_dataset = transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically(), years_ago=1)
-        elif dataset_value == 'Bureau of Labor Statistics Unemployment Rate':
-            # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='unemployment'), years_ago=1))
-            revised_dataset = get_bls_unemployment_data_statically()
-        elif dataset_value == 'U.S. Energy Information Administration Monthly Retail Gas Prices':
-            revised_dataset = get_eia_gas_price_data_statically()
+        # Taken from https://stackoverflow.com/q/70117272 
+        base = alt.Chart(chart_df, height=500).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
+        line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title(dataset1_short_title))
+        line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue'), scale=alt.Scale(zero=False)).title(dataset2_short_title))
+        c = (line + line2).resolve_scale(y='independent').properties(width=600)
+        st.altair_chart(c, use_container_width=True)
 
-        # Potentially daily indicators
-        elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
-            revised_dataset = get_civiqs_sentiment_data()
-        elif dataset_value == 'A Democrat is President of the United States':
-            revised_dataset = get_democrat_in_white_house_data()
-        elif dataset_value == 'Federal Reserve Bank of San Francisco Daily News Sentiment Index':
-            revised_dataset = get_frb_news_sentiment_data()
-        # elif dataset_value == 'GasBuddy Daily National Gas Prices':
-        #     revised_dataset = get_gasbuddy_prices()
-        elif dataset_value == 'Civiqs Joe Biden Job Approval - Net Approve':
-            revised_dataset = get_civiqs_biden_job_approval_data()
-        elif dataset_value == '538 Joe Biden 2024 Election Polling Average':
-            revised_dataset = get_joe_biden_polling_average()
+        with st.expander("See raw data"):
+            table_df
 
-        if dataset_index == 2 and dataset2_lag > 0:
-            revised_dataset = time_shift_the_data(revised_dataset, 'days' if comparison_cadence == '%Y-%m-%d' else 'months', dataset2_lag)
-
-        if dataset1['cadence'] == 'daily' and comparison_cadence == '%Y-%m' and dataset_index == 1:
-            dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
-        elif comparison_cadence == '%Y-%m' and dataset2['cadence'] == 'daily' and dataset_index == 2:
-            dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
-        else:
-            dataset_candidates.append(revised_dataset)
-
-datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
-
-min_date = sorted(datasets[0], key = lambda x: x['date'])[0]['date']
-max_date = sorted(datasets[0], key = lambda x: x['date'], reverse=True)[0]['date']
-
-min_date = datetime.datetime.strptime(min_date, comparison_cadence)
-max_date = datetime.datetime.strptime(max_date, comparison_cadence)
-
-
-date_filter = st.slider(
-    "Limit observations to a custom date range",
-    value=(min_date, max_date),
-    min_value=min_date,
-    max_value=max_date,
-    format="YYYY-MM-DD"
-)
-
-datasets[0] = [x for x in datasets[0] if datetime.datetime.strptime(x['date'], comparison_cadence) >= date_filter[0] and datetime.datetime.strptime(x['date'], comparison_cadence) <= date_filter[1]]
-datasets[1] = [x for x in datasets[1] if datetime.datetime.strptime(x['date'], comparison_cadence) >= date_filter[0] and datetime.datetime.strptime(x['date'], comparison_cadence) <= date_filter[1]]
-
-if len(datasets[0]) >= 4:
-
-    pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] for x in datasets[1]])
-
-    st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
-
-    st.metric(label="Observations", value=len(datasets[0]))
-
-    dataset1_df = pd.DataFrame(datasets[0])
-    dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
-    dataset2_df = pd.DataFrame(datasets[1])
-    dataset2_df = dataset2_df.rename(columns={"value": 'data2'})
-
-    chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
-
-    if dataset1_picker != dataset2_picker:
-        table_df = chart_df.rename(columns={'data1': dataset1_picker, 'data2': dataset2_picker})
-        table_df = table_df[['date', dataset1_picker, dataset2_picker]]
     else:
-        table_df = chart_df.rename(columns={'data1': f'1 - {dataset1_picker}', 'data2': f'2 - {dataset2_picker}'})
-        table_df = table_df[['date', f'1 - {dataset1_picker}', f'2 - {dataset2_picker}']]
 
-    dataset1_short_title = next((x['short_title'] for x in eligible_datasets if dataset1_picker == x['title']), None)
-    dataset2_short_title = next((x['short_title'] for x in eligible_datasets if dataset2_picker == x['title']), None)
-
-    # Taken from https://stackoverflow.com/q/70117272 
-    base = alt.Chart(chart_df, height=500).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
-    line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title(dataset1_short_title))
-    line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue'), scale=alt.Scale(zero=False)).title(dataset2_short_title))
-    c = (line + line2).resolve_scale(y='independent').properties(width=600)
-    st.altair_chart(c, use_container_width=True)
-
-    with st.expander("See raw data"):
-        table_df
-
-else:
-
-    st.write('**Not enough data observations in common between these two datasets to calculate a meaningful correlation.** Try another combination of datasets.')
+        st.write('**Not enough data observations in common between these two datasets to calculate a meaningful correlation.** Try another combination of datasets.')
 
 
-with st.expander("See methodology"):
-    st.write('''
-        Each dataset above is available for free publicly at the URLs below the selection boxes.
-             
-        The Pearson's r coefficient is a measure of the strength of correlation between two data series. (Note that Pearson's r does *not* tell us the direction of *causation* between the two datasets or even whether any exists at all, but simply the degree to which the two datasets are correlated.)
-             
-        The value of Pearson's r ranges from a minimum of -1 to a maximum of 1. A value of 1 represents perfect positive correlation while a value of -1 represents perfect negative correlation. A Pearson's r value of 0 indicates that there is no relationship whatsoever between the two datasets.
-             
-        In practice, no two datasets will ever be perfectly correlated or perfectly uncorrelated. Although no exact consensus exists on the threshold of 'strong' correlation, generally a Pearson's r coefficient of 0.6 or above (or -0.6 or below) is considered a strong correlation.
-             
-        An important detail about the Pearson's r metric is that it requires two datasets of exactly equal length. That is, a monthly dataset covering two years cannot be compared to a monthly dataset that covers only one. This presents a challenge given the variety of datasets available here.
-             
-        To acccount for this, I have made two key adjustments to the datasets.
-             
-        First, I only include the data points from *dates in common* between the two datasets being compared. For example, when comparing a monthly dataset with observations from June 2019 to May 2023 with another dataset running from August 2001 to February 2024, I will trim both datasets so they only include observations between August 2001 and May 2023, a period during which both datasets have observations. (You can further limit the date range using the slider.)
-             
-        Secondly, when comparing two datasets whose observations occur at *different cadences* - e.g., one is reported monthly and the other is reported daily - I average the higher-frequency dataset over the lower-frequency cadence. An example of this would be correlating average gas prices (a dataset with daily observations) to consumer sentiment indices (which are generally measured monthly): in this case, I first average the daily gas prices for each month before correlating them with the monthly consumer sentiment index dataset.
-             
-        Additionally, you can time-shift the second dataset up to 365 days or 12 months back in time (depending on whether the correlation is being calculated on a daily or monthly basis, respectively). This allows you to measure correlations for lagging indicators: for example, it is possible that today's consumer sentiment correlates more closely with gas prices from 3 months ago rather than their current price right now.
-             
-        The line chart, and the data table directly above it, represent these datasets *after* all of these adjustments are made. (You can export/download the data to check it yourself and conduct your own analyses.) If you see any errors or bugs, please let me know!
+    with st.expander("See methodology"):
+        st.write('''
+            Each dataset above is available for free publicly at the URLs below the selection boxes.
+                
+            The Pearson's r coefficient is a measure of the strength of correlation between two data series. (Note that Pearson's r does *not* tell us the direction of *causation* between the two datasets or even whether any exists at all, but simply the degree to which the two datasets are correlated.)
+                
+            The value of Pearson's r ranges from a minimum of -1 to a maximum of 1. A value of 1 represents perfect positive correlation while a value of -1 represents perfect negative correlation. A Pearson's r value of 0 indicates that there is no relationship whatsoever between the two datasets.
+                
+            In practice, no two datasets will ever be perfectly correlated or perfectly uncorrelated. Although no exact consensus exists on the threshold of 'strong' correlation, generally a Pearson's r coefficient of 0.6 or above (or -0.6 or below) is considered a strong correlation.
+                
+            An important detail about the Pearson's r metric is that it requires two datasets of exactly equal length. That is, a monthly dataset covering two years cannot be compared to a monthly dataset that covers only one. This presents a challenge given the variety of datasets available here.
+                
+            To acccount for this, I have made two key adjustments to the datasets.
+                
+            First, I only include the data points from *dates in common* between the two datasets being compared. For example, when comparing a monthly dataset with observations from June 2019 to May 2023 with another dataset running from August 2001 to February 2024, I will trim both datasets so they only include observations between August 2001 and May 2023, a period during which both datasets have observations. (You can further limit the date range using the slider.)
+                
+            Secondly, when comparing two datasets whose observations occur at *different cadences* - e.g., one is reported monthly and the other is reported daily - I average the higher-frequency dataset over the lower-frequency cadence. An example of this would be correlating average gas prices (a dataset with daily observations) to consumer sentiment indices (which are generally measured monthly): in this case, I first average the daily gas prices for each month before correlating them with the monthly consumer sentiment index dataset.
+                
+            Additionally, you can time-shift the second dataset up to 365 days or 12 months back in time (depending on whether the correlation is being calculated on a daily or monthly basis, respectively). This allows you to measure correlations for lagging indicators: for example, it is possible that today's consumer sentiment correlates more closely with gas prices from 3 months ago rather than their current price right now.
+                
+            The line chart, and the data table directly above it, represent these datasets *after* all of these adjustments are made. (You can export/download the data to check it yourself and conduct your own analyses.) If you see any errors or bugs, please let me know!
+        ''')
+
+    html('''
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        <a href="https://twitter.com/jaypinho?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @jaypinho</a>
+        <br>
+        <a href="https://www.buymeacoffee.com/tether" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 145px !important;" ></a>
     ''')
 
-html('''
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    <a href="https://twitter.com/jaypinho?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @jaypinho</a>
-    <br>
-    <a href="https://www.buymeacoffee.com/tether" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 145px !important;" ></a>
-''')
+    st.write('''
+        <p>
+            Correlations Explorer is brought to you by <a href="https://twitter.com/jaypinho" target="_blank">Jay Pinho</a>.
+        </p>
+        <p>
+            Previous projects include:
+            <ul>
+                <li><a href="https://transcripts.streamlit.app/" target="_blank">Transcript Accuracy Analyzer</a></li>
+                <li><a href="https://podcast.streamlit.app/" target="_blank">Podcast Summarizer</a></li>
+                <li><a href="https://www.tethertransparency.com/" target="_blank">Tether Insolvency Calculator</a></li>
+                <li><a href="http://www.fedproject.com/" target="_blank">The Fed Project</a></li>
+                <li><a href="https://www.scotusmap.com/" target="_blank">SCOTUS Map</a></li>
+            </ul>
+        </p>
+        <p>
+            Subscribe to <a href="https://networked.substack.com/" target="_blank">my technology and politics newsletter</a>.
+        </p>
+        <p>
+            See any mistakes? <a href="https://twitter.com/jaypinho" target="_blank">Let me know</a>.
+        </p>
+    ''', unsafe_allow_html=True)
 
-st.write('''
-    <p>
-        Correlations Explorer is brought to you by <a href="https://twitter.com/jaypinho" target="_blank">Jay Pinho</a>.
-    </p>
-    <p>
-        Previous projects include:
-        <ul>
-            <li><a href="https://transcripts.streamlit.app/" target="_blank">Transcript Accuracy Analyzer</a></li>
-            <li><a href="https://podcast.streamlit.app/" target="_blank">Podcast Summarizer</a></li>
-            <li><a href="https://www.tethertransparency.com/" target="_blank">Tether Insolvency Calculator</a></li>
-            <li><a href="http://www.fedproject.com/" target="_blank">The Fed Project</a></li>
-            <li><a href="https://www.scotusmap.com/" target="_blank">SCOTUS Map</a></li>
-        </ul>
-    </p>
-    <p>
-        Subscribe to <a href="https://networked.substack.com/" target="_blank">my technology and politics newsletter</a>.
-    </p>
-    <p>
-        See any mistakes? <a href="https://twitter.com/jaypinho" target="_blank">Let me know</a>.
-    </p>
-''', unsafe_allow_html=True)
+
+run_app()
