@@ -12,6 +12,10 @@ st.set_page_config(page_title='Correlation Explorer', layout="wide")
 def calculate_pearsons(series1, series2):
     return np.corrcoef(series1, series2)[0, 1]
 
+######
+## The below section pulls data from various sources
+######
+
 @st.cache_data
 def get_umich_data(series='ics'):
 
@@ -269,6 +273,22 @@ def get_fed_funds_rate_data():
     list_data = [{'date': "-".join(x['date'].split("-")[:-1]), 'value': float(x['value']) } for x in fed_funds['observations']]
     return list_data
 
+@st.cache_data
+def get_gdp_growth_data():
+
+    df = pd.read_excel('https://cdn.ihsmarkit.com/www/default/1020/US-Monthly-GDP-History-Data.xlsx', sheet_name='Data', header=0)
+    df = df.rename(columns={'Unnamed: 0': 'date', 'Monthly Real GDP Index': 'value'})
+    df = df[["date", "value"]]
+    df = df[(df["date"] != '') & (df["date"].isnull() == False)]
+    df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(str(x).strip().split(' - ')[0] + ' - ' + str(x).strip().split(' - ')[1][:3], '%Y - %b').strftime('%Y-%m'))
+    # st.write('Raw data')
+    # df
+    return df.to_dict(orient='records')
+
+######
+## The below section includes various utility and data manipulation functions
+######
+
 # For example, FRBSF measures news sentiment daily, but we may want to average all values in a month if the dependent variable we're testing against (e.g. UMich consumer sentiment) is only available monthly.
 def average_daily_data_over_interval(data, strftime_interval):
     
@@ -304,25 +324,33 @@ def time_shift_the_data(data, interval, number_of_intervals):
         return [{'date': (datetime.datetime.strptime(x['date'], strftime_setting) + pd.DateOffset(months=number_of_intervals)).strftime(strftime_setting), 'value': x['value']} for x in data]
 
 # For example, inflation data is represented as a monthly price level number (CPI-U). To calculate inflation, you need to calculate the change in that number over some period of time. 
-def transform_data_into_annual_rate_of_change(data, years_ago=1):
+def transform_data_into_annual_rate_of_change(data, calc_method='same_month_last_year'):
 
     list_data = []
     strftime_setting = detect_date_strftime_setting(data[0]['date'])
     for data_point in data:
 
-        baseline_date = (datetime.datetime.strptime(data_point['date'], strftime_setting) - pd.DateOffset(years=years_ago)).strftime(strftime_setting)
+        if calc_method == 'same_month_last_year':
+            baseline_date = (datetime.datetime.strptime(data_point['date'], strftime_setting) - pd.DateOffset(years=1)).strftime(strftime_setting)
+        elif calc_method == 'monthly_annualized':
+            baseline_date = (datetime.datetime.strptime(data_point['date'], strftime_setting) - pd.DateOffset(months=1)).strftime(strftime_setting)
         matching_data_point = next((x for x in data if x['date'] == baseline_date), None)
         if matching_data_point is None:
             continue
 
+        if calc_method == 'same_month_last_year':
+            this_value = (data_point['value'] - matching_data_point['value']) / matching_data_point['value'] * 100
+        elif calc_method == 'monthly_annualized':
+            this_value = (((data_point['value'] / matching_data_point['value']) ** 12) - 1) * 100
+
         list_data.append({
             'date': data_point['date'],
-            'value': (data_point['value'] - matching_data_point['value']) / matching_data_point['value'] * 100
+            'value': this_value
         })
     
     return list_data
     
-# Takes an arbitrary number of datasets and returns a list of *values* (without the dates) from those same datasets, but only for the dates for which all datasets have data points
+# Takes an arbitrary number of datasets and returns a list of *values* from those same datasets, but only for the dates for which all datasets have data points
 def align_datasets(*datasets, include_dates=False):
 
     list_data = [ [] for x in datasets]
@@ -442,6 +470,13 @@ def run_app():
             'short_title': 'Fed Funds Rate',
             'url': 'https://fred.stlouisfed.org/series/FEDFUNDS',
             'cadence': 'monthly'
+        },
+        {
+            'title': 'S&P GMI GDP Growth Rate',
+            'short_title': 'GDP Growth Rate',
+            'url': 'https://www.spglobal.com/marketintelligence/en/mi/products/us-monthly-gdp-index.html',
+            'cadence': 'monthly',
+            'description': 'The GDP growth rate is calculated here by annualizing the change in estimated monthly GDP. See https://cdn.ihsmarkit.com/www/pdf/1020/US-Monthly-GDP-Current-Index.pdf for examples.'
         }
     ]
 
@@ -462,12 +497,14 @@ def run_app():
 
         st.selectbox('Pick dataset #1', [x['title'] for x in eligible_datasets] + ['Upload my own dataset'], index=0, key='dataset1_picker', help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
         st.caption(next((x['url'] for x in eligible_datasets if st.session_state.dataset1_picker == x['title']), ''))
+        st.caption(next((x['description'] for x in eligible_datasets if 'description' in x and st.session_state.dataset1_picker == x['title']), ''))
 
         if st.session_state.dataset1_picker == 'Upload my own dataset':
             st.file_uploader('Upload a CSV with two columns: "date" (YYYY-MM-DD or YYYY-MM) and "value" (int or float)', type=['csv'], accept_multiple_files=False, key='custom_dataset_picker_1', help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="visible")
 
         st.selectbox('Pick dataset #2', [x['title'] for x in eligible_datasets] + ['Upload my own dataset'], index=3, key='dataset2_picker', help=None, on_change=None, args=None, kwargs=None, placeholder="Choose an option", disabled=False, label_visibility="visible")
         st.caption(next((x['url'] for x in eligible_datasets if st.session_state.dataset2_picker == x['title']), ''))
+        st.caption(next((x['description'] for x in eligible_datasets if 'description' in x and st.session_state.dataset2_picker == x['title']), ''))
 
         if st.session_state.dataset2_picker == 'Upload my own dataset':
             st.file_uploader('Upload a CSV with two columns: "date" (YYYY-MM-DD or YYYY-MM) and "value" (int or float)', type=['csv'], accept_multiple_files=False, key='custom_dataset_picker_2', help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="visible")
@@ -552,15 +589,20 @@ def run_app():
                 elif dataset_value == 'Conference Board Consumer Confidence Index':
                     revised_dataset = get_conference_board_leading_indicators_data(exact_date=False)
                 elif dataset_value == 'Bureau of Labor Statistics Annual CPI Inflation Rate':
-                    # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='inflation'), years_ago=1))
-                    revised_dataset = transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically(), years_ago=1)
+                    # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='inflation')))
+                    revised_dataset = transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically())
                 elif dataset_value == 'Bureau of Labor Statistics Unemployment Rate':
-                    # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='unemployment'), years_ago=1))
+                    # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='unemployment')))
                     revised_dataset = get_bls_unemployment_data_statically()
                 elif dataset_value == 'U.S. Energy Information Administration Monthly Retail Gas Prices':
                     revised_dataset = get_eia_gas_price_data_statically()
                 elif dataset_value == 'Federal Funds Effective Rate':
                     revised_dataset = get_fed_funds_rate_data()
+                elif dataset_value == 'S&P GMI GDP Growth Rate':
+                    trailing_avg = get_gdp_growth_data()
+                    # st.write(pd.DataFrame(trailing_avg))
+                    revised_dataset = transform_data_into_annual_rate_of_change(trailing_avg, calc_method='monthly_annualized')
+                    # st.write(pd.DataFrame(revised_dataset))
 
                 # Potentially daily indicators
                 elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
