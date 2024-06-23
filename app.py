@@ -396,13 +396,13 @@ def correlate_two_datasets(data1, data2, include_transformed_datasets=False):
 
     if include_transformed_datasets:
         return {
-            'pearsons': calculate_pearsons(*aligned_datasets_without_dates),
+            'pearsons_before_date_filtering': calculate_pearsons(*aligned_datasets_without_dates),
             'data1_transformed': aligned_datasets[0],
             'data2_transformed': aligned_datasets[1]
         }
     else:
         return {
-            'pearsons': calculate_pearsons(*aligned_datasets_without_dates)
+            'pearsons_before_date_filtering': calculate_pearsons(*aligned_datasets_without_dates)
         }
 
 def calculate_correlations_across_lags(data1, data2, lag_unit, max_lag):
@@ -420,7 +420,7 @@ def calculate_correlations_across_lags(data1, data2, lag_unit, max_lag):
         lags_dataset.append(
             {
                 'lag': lag,
-                'correlation': correlation_at_this_lag['pearsons']
+                'correlation': correlation_at_this_lag['pearsons_before_date_filtering']
             }
         )
     
@@ -531,6 +531,8 @@ def run_app():
 
     if 'run_correlation_automatically' not in st.session_state:
         st.session_state['run_correlation_automatically'] = True
+    if 'update_lag_graph' not in st.session_state:
+        st.session_state['update_lag_graph'] = True
 
     st.header("Correlation Explorer")
 
@@ -589,7 +591,8 @@ def run_app():
             st.session_state.dataset2 = next((x for x in eligible_datasets if x['title'] == st.session_state.dataset2_picker), None) if st.session_state.custom_dataset_2 is None else st.session_state.custom_dataset_2
             st.session_state.comparison_cadence = '%Y-%m' if st.session_state.dataset1['cadence'] != st.session_state.dataset2['cadence'] or st.session_state.dataset1['cadence'] == 'monthly' else '%Y-%m-%d'
 
-            st.session_state.form_submitted = True
+            st.session_state.run_correlation_automatically = True
+            st.session_state.update_lag_graph = True
 
             print('Got to end of fragment, about to rerun()')
             print(list(st.session_state.keys()))
@@ -598,158 +601,141 @@ def run_app():
 
     fragment_form(eligible_datasets=eligible_datasets)
 
-    if 'form_submitted' not in st.session_state:
-        st.session_state['form_submitted'] = False
-
     # Set defaults - the comparison cadence defaults to monthly because by default we're comparing two monthly datasets (UMich ICS and Conf. Board Consumer Confidence)
-    if st.session_state.form_submitted == False:
-        print('Form has not been submitted')
-        st.session_state.comparison_cadence = '%Y-%m'
-        st.session_state.dataset1 = next((x for x in eligible_datasets if x['title'] == st.session_state.dataset1_picker), None)
-        st.session_state.dataset2 = next((x for x in eligible_datasets if x['title'] == st.session_state.dataset2_picker), None)
-        st.session_state.custom_dataset_1 = None
-        st.session_state.custom_dataset_2 = None
+    if 'comparison_cadence' not in st.session_state: st.session_state.comparison_cadence = '%Y-%m'
+    if 'dataset1' not in st.session_state: st.session_state.dataset1 = next((x for x in eligible_datasets if x['title'] == st.session_state.dataset1_picker), None)
+    if 'dataset2' not in st.session_state: st.session_state.dataset2 = next((x for x in eligible_datasets if x['title'] == st.session_state.dataset2_picker), None)
+    if 'custom_dataset_1' not in st.session_state: st.session_state.custom_dataset_1 = None
+    if 'custom_dataset_2' not in st.session_state: st.session_state.custom_dataset_2 = None
 
-    if st.session_state.form_submitted or st.session_state.run_correlation_automatically:
+    print('rerunning')
+    print(st.session_state.run_correlation_automatically)
 
-        print('rerunning')
+    dataset_candidates = []
 
-        del st.session_state['run_correlation_automatically']
+    st.slider(label=f"Shift each observation in dataset #2 backwards by the below number of {'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months'} before comparing datasets (see methodology section below)", min_value=0, max_value=365 if st.session_state.comparison_cadence == '%Y-%m-%d' else 12, value=0, key='dataset2_lag')
 
-        dataset_candidates = []
+    with st.spinner('Loading datasets...'):
+        for dataset_index in [1, 2]:
 
-        st.slider(label=f"Shift each observation in dataset #2 backwards by the below number of {'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months'} before comparing datasets (see methodology section below)", min_value=0, max_value=365 if st.session_state.comparison_cadence == '%Y-%m-%d' else 12, value=0, key='dataset2_lag')
-
-        with st.spinner('Loading datasets...'):
-            for dataset_index in [1, 2]:
-
-                if dataset_index == 1:
-                    dataset_value = st.session_state.dataset1_picker
-                else:
-                    dataset_value = st.session_state.dataset2_picker
-
-                revised_dataset = None
-
-                # Monthly indicators
-                if dataset_value == 'University of Michigan Index of Consumer Sentiment':
-                    revised_dataset = get_umich_data(series='ics')
-                elif dataset_value == 'University of Michigan Index of Consumer Expectations':
-                    revised_dataset = get_umich_data(series='ice')
-                elif dataset_value == 'University of Michigan Index of Current Economic Conditions':
-                    revised_dataset = get_umich_data(series='icc')
-                elif dataset_value == 'Conference Board Consumer Confidence Index':
-                    revised_dataset = get_conference_board_leading_indicators_data(exact_date=False)
-                elif dataset_value == 'Bureau of Labor Statistics Annual CPI Inflation Rate':
-                    # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='inflation')))
-                    revised_dataset = transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically())
-                elif dataset_value == 'Bureau of Labor Statistics Unemployment Rate':
-                    # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='unemployment')))
-                    revised_dataset = get_bls_unemployment_data_statically()
-                elif dataset_value == 'U.S. Energy Information Administration Monthly Retail Gas Prices':
-                    revised_dataset = get_eia_gas_price_data_statically()
-                elif dataset_value == 'Federal Funds Effective Rate':
-                    revised_dataset = get_fed_funds_rate_data()
-                elif dataset_value == 'S&P GMI GDP Growth Rate':
-                    trailing_avg = get_gdp_growth_data()
-                    # st.write(pd.DataFrame(trailing_avg))
-                    revised_dataset = transform_data_into_annual_rate_of_change(trailing_avg, calc_method='monthly_annualized')
-                    # st.write(pd.DataFrame(revised_dataset))
-
-                # Potentially daily indicators
-                elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
-                    revised_dataset = get_civiqs_sentiment_data()
-                elif dataset_value == 'A Democrat is President of the United States':
-                    revised_dataset = get_democrat_in_white_house_data()
-                elif dataset_value == 'Federal Reserve Bank of San Francisco Daily News Sentiment Index':
-                    revised_dataset = get_frb_news_sentiment_data()
-                # elif dataset_value == 'GasBuddy Daily National Gas Prices':
-                #     revised_dataset = get_gasbuddy_prices()
-                elif dataset_value == 'Civiqs Joe Biden Job Approval - Net Approve':
-                    revised_dataset = get_civiqs_biden_job_approval_data()
-                elif dataset_value == '538 Joe Biden 2024 Election Polling Average':
-                    revised_dataset = get_joe_biden_polling_average()
-                elif dataset_value == 'PredictIt Odds of Biden 2024 Victory':
-                    revised_dataset = get_predictit_prices()
-
-                # Custom datasets
-                elif st.session_state.custom_dataset_1 is not None and dataset_index == 1:
-                    revised_dataset = st.session_state.custom_dataset_1['dataset']
-                elif st.session_state.custom_dataset_2 is not None and dataset_index == 2:
-                    revised_dataset = st.session_state.custom_dataset_2['dataset']
-
-                dataset_candidates.append(revised_dataset)
-
-                # if dataset_index == 2 and st.session_state.dataset2_lag > 0:
-                #     revised_dataset = time_shift_the_data(revised_dataset, 'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months', st.session_state.dataset2_lag)
-
-                # if st.session_state.dataset1['cadence'] == 'daily' and st.session_state.comparison_cadence == '%Y-%m' and dataset_index == 1:
-                #     dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
-                # elif st.session_state.comparison_cadence == '%Y-%m' and st.session_state.dataset2['cadence'] == 'daily' and dataset_index == 2:
-                #     dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
-                # else:
-                #     dataset_candidates.append(revised_dataset)
-
-        # datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
-        lagged_dataset2 = time_shift_the_data(dataset_candidates[1], 'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months', st.session_state.dataset2_lag) if st.session_state.dataset2_lag > 0 else dataset_candidates[1]
-        datasets = correlate_two_datasets(dataset_candidates[0], lagged_dataset2, include_transformed_datasets=True)
-
-        min_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'])[0]['date']
-        max_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'], reverse=True)[0]['date']
-
-        min_date = datetime.datetime.strptime(min_date, st.session_state.comparison_cadence)
-        max_date = datetime.datetime.strptime(max_date, st.session_state.comparison_cadence)
-
-        if 'date_filter' in st.session_state:
-            print(st.session_state.date_filter)
-        else:
-            print('no date filter in session_state')
-        st.slider(
-            "Limit observations to a custom date range",
-            value=(min_date, max_date) if 'date_filter' not in st.session_state or st.session_state.form_submitted else (max(min_date, st.session_state.date_filter[0]), min(max_date, st.session_state.date_filter[1])),
-            min_value=min_date,
-            max_value=max_date,
-            format="YYYY-MM-DD",
-            key='date_filter'
-        )
-
-        del st.session_state['form_submitted']
-
-        datasets['data1_transformed'] = [x for x in datasets['data1_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
-        datasets['data2_transformed'] = [x for x in datasets['data2_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
-
-        if len(datasets['data1_transformed']) >= 4:
-
-            # pearsons_r = calculate_pearsons([x['value'] for x in datasets['data1_transformed']], [x['value'] for x in datasets['data2_transformed']])
-            pearsons_r = datasets['pearsons']
-
-            st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
-
-            st.metric(label="Observations", value=f'{len(datasets['data1_transformed']):,}')
-
-            dataset1_df = pd.DataFrame(datasets['data1_transformed'])
-            dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
-            dataset2_df = pd.DataFrame(datasets['data2_transformed'])
-            dataset2_df = dataset2_df.rename(columns={"value": 'data2'})
-
-            chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
-
-            if st.session_state.dataset1_picker != st.session_state.dataset2_picker:
-                table_df = chart_df.rename(columns={'data1': st.session_state.dataset1_picker, 'data2': st.session_state.dataset2_picker})
-                table_df = table_df[['date', st.session_state.dataset1_picker, st.session_state.dataset2_picker]]
+            if dataset_index == 1:
+                dataset_value = st.session_state.dataset1_picker
             else:
-                table_df = chart_df.rename(columns={'data1': f'1 - {st.session_state.dataset1_picker}', 'data2': f'2 - {st.session_state.dataset2_picker}'})
-                table_df = table_df[['date', f'1 - {st.session_state.dataset1_picker}', f'2 - {st.session_state.dataset2_picker}']]
+                dataset_value = st.session_state.dataset2_picker
 
-            dataset1_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset1_picker == x['title']), None) if st.session_state.custom_dataset_1 is None else st.session_state.custom_dataset_1['short_title']
-            dataset2_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset2_picker == x['title']), None) if st.session_state.custom_dataset_2 is None else st.session_state.custom_dataset_2['short_title']
+            revised_dataset = None
 
-            # Taken from https://stackoverflow.com/q/70117272 
-            base = alt.Chart(chart_df, height=500).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
-            line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title(dataset1_short_title))
-            line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue'), scale=alt.Scale(zero=False)).title(dataset2_short_title))
-            c = (line + line2).resolve_scale(y='independent').properties(width=600)
-            st.altair_chart(c, use_container_width=True)
+            # Monthly indicators
+            if dataset_value == 'University of Michigan Index of Consumer Sentiment':
+                revised_dataset = get_umich_data(series='ics')
+            elif dataset_value == 'University of Michigan Index of Consumer Expectations':
+                revised_dataset = get_umich_data(series='ice')
+            elif dataset_value == 'University of Michigan Index of Current Economic Conditions':
+                revised_dataset = get_umich_data(series='icc')
+            elif dataset_value == 'Conference Board Consumer Confidence Index':
+                revised_dataset = get_conference_board_leading_indicators_data(exact_date=False)
+            elif dataset_value == 'Bureau of Labor Statistics Annual CPI Inflation Rate':
+                # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='inflation')))
+                revised_dataset = transform_data_into_annual_rate_of_change(get_bls_inflation_data_statically())
+            elif dataset_value == 'Bureau of Labor Statistics Unemployment Rate':
+                # dataset_candidates.append(transform_data_into_annual_rate_of_change(get_bls_data(series='unemployment')))
+                revised_dataset = get_bls_unemployment_data_statically()
+            elif dataset_value == 'U.S. Energy Information Administration Monthly Retail Gas Prices':
+                revised_dataset = get_eia_gas_price_data_statically()
+            elif dataset_value == 'Federal Funds Effective Rate':
+                revised_dataset = get_fed_funds_rate_data()
+            elif dataset_value == 'S&P GMI GDP Growth Rate':
+                trailing_avg = get_gdp_growth_data()
+                # st.write(pd.DataFrame(trailing_avg))
+                revised_dataset = transform_data_into_annual_rate_of_change(trailing_avg, calc_method='monthly_annualized')
+                # st.write(pd.DataFrame(revised_dataset))
 
+            # Potentially daily indicators
+            elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
+                revised_dataset = get_civiqs_sentiment_data()
+            elif dataset_value == 'A Democrat is President of the United States':
+                revised_dataset = get_democrat_in_white_house_data()
+            elif dataset_value == 'Federal Reserve Bank of San Francisco Daily News Sentiment Index':
+                revised_dataset = get_frb_news_sentiment_data()
+            # elif dataset_value == 'GasBuddy Daily National Gas Prices':
+            #     revised_dataset = get_gasbuddy_prices()
+            elif dataset_value == 'Civiqs Joe Biden Job Approval - Net Approve':
+                revised_dataset = get_civiqs_biden_job_approval_data()
+            elif dataset_value == '538 Joe Biden 2024 Election Polling Average':
+                revised_dataset = get_joe_biden_polling_average()
+            elif dataset_value == 'PredictIt Odds of Biden 2024 Victory':
+                revised_dataset = get_predictit_prices()
+
+            # Custom datasets
+            elif st.session_state.custom_dataset_1 is not None and dataset_index == 1:
+                revised_dataset = st.session_state.custom_dataset_1['dataset']
+            elif st.session_state.custom_dataset_2 is not None and dataset_index == 2:
+                revised_dataset = st.session_state.custom_dataset_2['dataset']
+
+            dataset_candidates.append(revised_dataset)
+
+
+    lagged_dataset2 = time_shift_the_data(dataset_candidates[1], 'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months', st.session_state.dataset2_lag) if st.session_state.dataset2_lag > 0 else dataset_candidates[1]
+    datasets = correlate_two_datasets(dataset_candidates[0], lagged_dataset2, include_transformed_datasets=True)
+
+    min_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'])[0]['date']
+    max_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'], reverse=True)[0]['date']
+
+    min_date = datetime.datetime.strptime(min_date, st.session_state.comparison_cadence)
+    max_date = datetime.datetime.strptime(max_date, st.session_state.comparison_cadence)
+
+    if 'date_filter' in st.session_state:
+        print(st.session_state.date_filter)
+    else:
+        print('no date filter in session_state')
+    st.slider(
+        "Limit observations to a custom date range",
+        value=(min_date, max_date) if 'date_filter' not in st.session_state or st.session_state.run_correlation_automatically else (max(min_date, st.session_state.date_filter[0]), min(max_date, st.session_state.date_filter[1])),
+        min_value=min_date,
+        max_value=max_date,
+        format="YYYY-MM-DD",
+        key='date_filter'
+    )
+
+    datasets['data1_transformed'] = [x for x in datasets['data1_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
+    datasets['data2_transformed'] = [x for x in datasets['data2_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
+
+    if len(datasets['data1_transformed']) >= 4:
+
+        pearsons_r = calculate_pearsons([x['value'] for x in datasets['data1_transformed']], [x['value'] for x in datasets['data2_transformed']])
+        # pearsons_r = datasets['pearsons_before_date_filtering']
+
+        st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
+
+        st.metric(label="Observations", value=f'{len(datasets['data1_transformed']):,}')
+
+        dataset1_df = pd.DataFrame(datasets['data1_transformed'])
+        dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
+        dataset2_df = pd.DataFrame(datasets['data2_transformed'])
+        dataset2_df = dataset2_df.rename(columns={"value": 'data2'})
+
+        chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
+
+        if st.session_state.dataset1_picker != st.session_state.dataset2_picker:
+            table_df = chart_df.rename(columns={'data1': st.session_state.dataset1_picker, 'data2': st.session_state.dataset2_picker})
+            table_df = table_df[['date', st.session_state.dataset1_picker, st.session_state.dataset2_picker]]
+        else:
+            table_df = chart_df.rename(columns={'data1': f'1 - {st.session_state.dataset1_picker}', 'data2': f'2 - {st.session_state.dataset2_picker}'})
+            table_df = table_df[['date', f'1 - {st.session_state.dataset1_picker}', f'2 - {st.session_state.dataset2_picker}']]
+
+        dataset1_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset1_picker == x['title']), None) if st.session_state.custom_dataset_1 is None else st.session_state.custom_dataset_1['short_title']
+        dataset2_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset2_picker == x['title']), None) if st.session_state.custom_dataset_2 is None else st.session_state.custom_dataset_2['short_title']
+
+        # Taken from https://stackoverflow.com/q/70117272 
+        base = alt.Chart(chart_df, height=500).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
+        line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title(dataset1_short_title))
+        line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue'), scale=alt.Scale(zero=False)).title(dataset2_short_title))
+        c = (line + line2).resolve_scale(y='independent').properties(width=600)
+        st.altair_chart(c, use_container_width=True)
+
+        if st.session_state.update_lag_graph:
+
+            print('Now updating lag graph...')
 
             dataset2_interval = detect_date_strftime_setting(dataset_candidates[1][0]['date'])
             lag_chart_df = pd.DataFrame(calculate_correlations_across_lags(dataset_candidates[0], dataset_candidates[1], dataset2_interval, 12 if dataset2_interval == '%Y-%m' else 365))
@@ -766,13 +752,17 @@ def run_app():
             lag_line = lag_base.mark_line(color='red').encode(y=alt.Y('correlation:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title('Pearson\'s r'))
             st.altair_chart(lag_line, use_container_width=True)
 
+            st.session_state.update_lag_graph = False
 
-            with st.expander("See raw data"):
-                table_df
+        with st.expander("See raw data"):
+            table_df
 
-        else:
+    else:
 
-            st.write('**Not enough data observations in common between these two datasets to calculate a meaningful correlation.** Try another combination of datasets.')
+        st.write('**Not enough data observations in common between these two datasets to calculate a meaningful correlation.** Try another combination of datasets.')
+
+
+    st.session_state['run_correlation_automatically'] = False
 
 
     with st.expander("See methodology"):
