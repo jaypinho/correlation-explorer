@@ -690,7 +690,8 @@ def run_app():
                 #     dataset_candidates.append(revised_dataset)
 
         # datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
-        datasets = correlate_two_datasets(dataset_candidates[0], dataset_candidates[1], include_transformed_datasets=True)
+        lagged_dataset2 = time_shift_the_data(dataset_candidates[1], 'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months', st.session_state.dataset2_lag) if st.session_state.dataset2_lag > 0 else dataset_candidates[1]
+        datasets = correlate_two_datasets(dataset_candidates[0], lagged_dataset2, include_transformed_datasets=True)
 
         min_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'])[0]['date']
         max_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'], reverse=True)[0]['date']
