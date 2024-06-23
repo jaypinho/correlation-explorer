@@ -74,7 +74,7 @@ def get_civiqs_sentiment_data():
 
     print('Not cached - Civiqs sentiment data')
 
-    sentiment = requests.get('https://results-api.civiqs.com/results_api/results/economy_us_now/trendline/%7B%7D?run_id=cf852969', headers={
+    sentiment = requests.get('https://results-api.civiqs.com/results_api/results/economy_us_now/trendline/%7B%7D?run_id=2e1ad200', headers={
         'Accept': 'application/vnd.questionator.v3',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     }).json()
@@ -93,7 +93,7 @@ def get_civiqs_biden_job_approval_data():
 
     print('Not cached - Civiqs Biden approval data')
 
-    sentiment = requests.get('https://results-api.civiqs.com/results_api/results/approve_president_biden/trendline/%7B%7D?run_id=293c6aed', headers={
+    sentiment = requests.get('https://results-api.civiqs.com/results_api/results/approve_president_biden/trendline/%7B%7D?run_id=d9030853', headers={
         'Accept': 'application/vnd.questionator.v3',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     }).json()
@@ -379,11 +379,12 @@ def isfloat(num):
 
 # This method should take in two datasets, figure out if they're on the same level of granularity (e.g. YYYY-MM-DD vs. YYYY-MM), average out the more granular one to equal the granularity of the less granular one, align the datasets, and then calculate Pearson's correlation coefficient
 def correlate_two_datasets(data1, data2, include_transformed_datasets=False):
+    # print(data1[0]['date'], detect_date_strftime_setting(data1[0]['date']))
     if detect_date_strftime_setting(data1[0]['date']) == detect_date_strftime_setting(data2[0]['date']):
         revised_data1 = data1
         revised_data2 = data2
     else:
-        if detect_date_strftime_setting(data1[0]['date']) == '%Y-%m-d':
+        if detect_date_strftime_setting(data1[0]['date']) == '%Y-%m-%d':
             revised_data1 = average_daily_data_over_interval(data1, '%Y-%m')
             revised_data2 = data2
         else:
@@ -412,10 +413,14 @@ def calculate_correlations_across_lags(data1, data2, lag_unit, max_lag):
 
         data2_shifted = time_shift_the_data(data2, 'days' if lag_unit == '%Y-%m-%d' else 'months', lag)
 
+        correlation_at_this_lag = correlate_two_datasets(data1, data2_shifted, include_transformed_datasets=True)
+        if len(correlation_at_this_lag['data1_transformed']) < 4:
+            break
+
         lags_dataset.append(
             {
                 'lag': lag,
-                'correlation': correlate_two_datasets(data1, data2_shifted, include_transformed_datasets=False)['pearsons']
+                'correlation': correlation_at_this_lag['pearsons']
             }
         )
     
@@ -606,6 +611,8 @@ def run_app():
         st.session_state.custom_dataset_2 = None
 
     if st.session_state.form_submitted or st.session_state.run_correlation_automatically:
+
+        print('rerunning')
 
         del st.session_state['run_correlation_automatically']
 
