@@ -414,7 +414,8 @@ def calculate_correlations_across_lags(data1, data2, lag_unit, max_lag):
 
         lags_dataset.append(
             {
-                lag: correlate_two_datasets(data1, data2_shifted, include_transformed_datasets=False)['pearsons']
+                'lag': lag,
+                'correlation': correlate_two_datasets(data1, data2_shifted, include_transformed_datasets=False)['pearsons']
             }
         )
     
@@ -740,6 +741,23 @@ def run_app():
             line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue'), scale=alt.Scale(zero=False)).title(dataset2_short_title))
             c = (line + line2).resolve_scale(y='independent').properties(width=600)
             st.altair_chart(c, use_container_width=True)
+
+
+            dataset2_interval = detect_date_strftime_setting(dataset_candidates[1][0]['date'])
+            lag_chart_df = pd.DataFrame(calculate_correlations_across_lags(dataset_candidates[0], dataset_candidates[1], dataset2_interval, 12 if dataset2_interval == '%Y-%m' else 365))
+            st.write(lag_chart_df)
+            lag_base = alt.Chart(lag_chart_df, height=500).encode(
+                x=alt.X('lag:Q', 
+                        axis=alt.Axis(
+                            tickCount=10,  # Adjust this number as needed
+                            tickMinStep=1,
+                            format='d'
+                        )
+                ).title(f'{"Months" if dataset2_interval == "%Y-%m" else "Days"} of Lag')
+            )
+            lag_line = lag_base.mark_line(color='red').encode(y=alt.Y('correlation:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title('Pearson\'s r'))
+            st.altair_chart(lag_line, use_container_width=True)
+
 
             with st.expander("See raw data"):
                 table_df
