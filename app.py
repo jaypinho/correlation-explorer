@@ -377,6 +377,49 @@ def isfloat(num):
     except ValueError:
         return False
 
+# This method should take in two datasets, figure out if they're on the same level of granularity (e.g. YYYY-MM-DD vs. YYYY-MM), average out the more granular one to equal the granularity of the less granular one, align the datasets, and then calculate Pearson's correlation coefficient
+def correlate_two_datasets(data1, data2, include_transformed_datasets=False):
+    if detect_date_strftime_setting(data1[0]['date']) == detect_date_strftime_setting(data2[0]['date']):
+        revised_data1 = data1
+        revised_data2 = data2
+    else:
+        if detect_date_strftime_setting(data1[0]['date']) == '%Y-%m-d':
+            revised_data1 = average_daily_data_over_interval(data1, '%Y-%m')
+            revised_data2 = data2
+        else:
+            revised_data1 = data1
+            revised_data2 = average_daily_data_over_interval(data2, '%Y-%m')
+
+    aligned_datasets = align_datasets(revised_data1, revised_data2, include_dates=True)
+    aligned_datasets_without_dates = [ [ x['value'] for x in y ] for y in aligned_datasets]
+
+    if include_transformed_datasets:
+        return {
+            'pearsons': calculate_pearsons(*aligned_datasets_without_dates),
+            'data1_transformed': aligned_datasets[0],
+            'data2_transformed': aligned_datasets[1]
+        }
+    else:
+        return {
+            'pearsons': calculate_pearsons(*aligned_datasets_without_dates)
+        }
+
+def calculate_correlations_across_lags(data1, data2, lag_unit, max_lag):
+
+    lags_dataset = []
+
+    for lag in range(0, max_lag+1):
+
+        data2_shifted = time_shift_the_data(data2, 'days' if lag_unit == '%Y-%m-%d' else 'months', lag)
+
+        lags_dataset.append(
+            {
+                lag: correlate_two_datasets(data1, data2_shifted, include_transformed_datasets=False)['pearsons']
+            }
+        )
+    
+    return lags_dataset
+
 def run_app():
 
     eligible_datasets = [
@@ -626,21 +669,23 @@ def run_app():
                 elif st.session_state.custom_dataset_2 is not None and dataset_index == 2:
                     revised_dataset = st.session_state.custom_dataset_2['dataset']
 
+                dataset_candidates.append(revised_dataset)
 
-                if dataset_index == 2 and st.session_state.dataset2_lag > 0:
-                    revised_dataset = time_shift_the_data(revised_dataset, 'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months', st.session_state.dataset2_lag)
+                # if dataset_index == 2 and st.session_state.dataset2_lag > 0:
+                #     revised_dataset = time_shift_the_data(revised_dataset, 'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months', st.session_state.dataset2_lag)
 
-                if st.session_state.dataset1['cadence'] == 'daily' and st.session_state.comparison_cadence == '%Y-%m' and dataset_index == 1:
-                    dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
-                elif st.session_state.comparison_cadence == '%Y-%m' and st.session_state.dataset2['cadence'] == 'daily' and dataset_index == 2:
-                    dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
-                else:
-                    dataset_candidates.append(revised_dataset)
+                # if st.session_state.dataset1['cadence'] == 'daily' and st.session_state.comparison_cadence == '%Y-%m' and dataset_index == 1:
+                #     dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
+                # elif st.session_state.comparison_cadence == '%Y-%m' and st.session_state.dataset2['cadence'] == 'daily' and dataset_index == 2:
+                #     dataset_candidates.append(average_daily_data_over_interval(revised_dataset, '%Y-%m'))
+                # else:
+                #     dataset_candidates.append(revised_dataset)
 
-        datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
+        # datasets = align_datasets(dataset_candidates[0], dataset_candidates[1], include_dates=True)
+        datasets = correlate_two_datasets(dataset_candidates[0], dataset_candidates[1], include_transformed_datasets=True)
 
-        min_date = sorted(datasets[0], key = lambda x: x['date'])[0]['date']
-        max_date = sorted(datasets[0], key = lambda x: x['date'], reverse=True)[0]['date']
+        min_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'])[0]['date']
+        max_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'], reverse=True)[0]['date']
 
         min_date = datetime.datetime.strptime(min_date, st.session_state.comparison_cadence)
         max_date = datetime.datetime.strptime(max_date, st.session_state.comparison_cadence)
@@ -660,20 +705,21 @@ def run_app():
 
         del st.session_state['form_submitted']
 
-        datasets[0] = [x for x in datasets[0] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
-        datasets[1] = [x for x in datasets[1] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
+        datasets['data1_transformed'] = [x for x in datasets['data1_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
+        datasets['data2_transformed'] = [x for x in datasets['data2_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
 
-        if len(datasets[0]) >= 4:
+        if len(datasets['data1_transformed']) >= 4:
 
-            pearsons_r = calculate_pearsons([x['value'] for x in datasets[0]], [x['value'] for x in datasets[1]])
+            # pearsons_r = calculate_pearsons([x['value'] for x in datasets['data1_transformed']], [x['value'] for x in datasets['data2_transformed']])
+            pearsons_r = datasets['pearsons']
 
             st.metric(label="Pearson's r", value=round(pearsons_r, 3), delta="Strong" if abs(pearsons_r) >= 0.6 else "Moderate" if abs(pearsons_r) >= 0.4 else "Weak")
 
-            st.metric(label="Observations", value=f'{len(datasets[0]):,}')
+            st.metric(label="Observations", value=f'{len(datasets['data1_transformed']):,}')
 
-            dataset1_df = pd.DataFrame(datasets[0])
+            dataset1_df = pd.DataFrame(datasets['data1_transformed'])
             dataset1_df = dataset1_df.rename(columns={"value": 'data1'})
-            dataset2_df = pd.DataFrame(datasets[1])
+            dataset2_df = pd.DataFrame(datasets['data2_transformed'])
             dataset2_df = dataset2_df.rename(columns={"value": 'data2'})
 
             chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
