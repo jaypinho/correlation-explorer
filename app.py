@@ -795,7 +795,7 @@ def run_app():
 
             print('Now updating lag graph...')
 
-            dataset2_interval = detect_date_strftime_setting(dataset_candidates[1][0]['date'])
+            dataset2_interval = st.session_state.comparison_cadence
             if st.session_state.lag_graph is None:
                 lag_chart_df = pd.DataFrame(calculate_correlations_across_lags(dataset_candidates[0], dataset_candidates[1], dataset2_interval))
                 st.session_state.lag_graph = lag_chart_df
