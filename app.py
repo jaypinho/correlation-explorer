@@ -377,13 +377,14 @@ def isfloat(num):
     except ValueError:
         return False
 
-# This method should take in two datasets, figure out if they're on the same level of granularity (e.g. YYYY-MM-DD vs. YYYY-MM), average out the more granular one to equal the granularity of the less granular one, align the datasets, and then calculate Pearson's correlation coefficient
-def correlate_two_datasets(data1, data2, include_transformed_datasets=False):
-    # print(data1[0]['date'], detect_date_strftime_setting(data1[0]['date']))
+def get_datasets_into_same_interval(data1, data2):
+
     if detect_date_strftime_setting(data1[0]['date']) == detect_date_strftime_setting(data2[0]['date']):
         revised_data1 = data1
         revised_data2 = data2
+        interval = detect_date_strftime_setting(data1[0]['date'])
     else:
+        interval = '%Y-%m'
         if detect_date_strftime_setting(data1[0]['date']) == '%Y-%m-%d':
             revised_data1 = average_daily_data_over_interval(data1, '%Y-%m')
             revised_data2 = data2
@@ -391,7 +392,36 @@ def correlate_two_datasets(data1, data2, include_transformed_datasets=False):
             revised_data1 = data1
             revised_data2 = average_daily_data_over_interval(data2, '%Y-%m')
 
-    aligned_datasets = align_datasets(revised_data1, revised_data2, include_dates=True)
+    return {
+        'data1': revised_data1,
+        'data2': revised_data2,
+        'interval': interval
+    }
+
+def get_max_possible_lag(data1, data2, min_number_of_observations=4):
+
+    same_interval_datasets = get_datasets_into_same_interval(data1, data2)
+
+    latest_data1_date = datetime.datetime.strptime(same_interval_datasets['data1'][-1]['date'], st.session_state.comparison_cadence)
+    earliest_data2_date = datetime.datetime.strptime(same_interval_datasets['data2'][0]['date'], st.session_state.comparison_cadence)
+
+    if st.session_state.comparison_cadence == '%Y-%m-%d':
+        max_lag = min((latest_data1_date - earliest_data2_date).days - min_number_of_observations + 1, 365)
+    else:
+        months = 0
+        while earliest_data2_date < latest_data1_date:
+            earliest_data2_date += pd.DateOffset(months=1)
+            months += 1
+        max_lag = min(months - min_number_of_observations + 1, 12)
+
+    return max_lag
+
+# This method should take in two datasets, figure out if they're on the same level of granularity (e.g. YYYY-MM-DD vs. YYYY-MM), average out the more granular one to equal the granularity of the less granular one, align the datasets, and then calculate Pearson's correlation coefficient
+def correlate_two_datasets(data1, data2, include_transformed_datasets=False):
+
+    same_interval_datasets = get_datasets_into_same_interval(data1, data2)
+
+    aligned_datasets = align_datasets(same_interval_datasets['data1'], same_interval_datasets['data2'], include_dates=True)
     aligned_datasets_without_dates = [ [ x['value'] for x in y ] for y in aligned_datasets]
 
     if include_transformed_datasets:
@@ -405,15 +435,40 @@ def correlate_two_datasets(data1, data2, include_transformed_datasets=False):
             'pearsons_before_date_filtering': calculate_pearsons(*aligned_datasets_without_dates)
         }
 
-def calculate_correlations_across_lags(data1, data2, lag_unit, max_lag):
+def calculate_correlations_across_lags(data1, data2, lag_unit):
 
     lags_dataset = []
+    benchmarking = {
+        'time_shift': 0,
+        'correlation': 0
+    }
+
+    # The below section is all about making the upcoming iterative portion much more efficient by shrinking the two datasets to the smallest possible size they can be while still supporting all the lag values necessary 
+    same_interval_datasets = get_datasets_into_same_interval(data1, data2)
+
+    max_lag = get_max_possible_lag(same_interval_datasets['data1'], same_interval_datasets['data2'])
+
+    dates_in_common = [ x['date'] for x in same_interval_datasets['data1'] if x['date'] in [y['date'] for y in same_interval_datasets['data2']] ]
+
+    # min_date finds whichever is later, the min date from data1 or the min date from data2
+    min_date = datetime.datetime.strptime(sorted(dates_in_common)[0], same_interval_datasets['interval'])
+    max_date = datetime.datetime.strptime(sorted(dates_in_common, reverse=True)[0], same_interval_datasets['interval']) + (pd.DateOffset(days=max_lag) if same_interval_datasets['interval'] == '%Y-%m-%d' else pd.DateOffset(months=max_lag))
+
+    revised_data1 = [x for x in same_interval_datasets['data1'] if datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) >= min_date and datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) <= max_date]
+    revised_data2 = [x for x in same_interval_datasets['data2'] if datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) >= min_date and datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) <= max_date]
 
     for lag in range(0, max_lag+1):
 
-        data2_shifted = time_shift_the_data(data2, 'days' if lag_unit == '%Y-%m-%d' else 'months', lag)
+        print(lag, max_lag)
 
-        correlation_at_this_lag = correlate_two_datasets(data1, data2_shifted, include_transformed_datasets=True)
+        benchmark_start = datetime.datetime.now()
+        data2_shifted = time_shift_the_data(revised_data2, 'days' if lag_unit == '%Y-%m-%d' else 'months', lag)
+        benchmarking['time_shift'] += (datetime.datetime.now() - benchmark_start).total_seconds()
+
+        benchmark_start = datetime.datetime.now()
+        correlation_at_this_lag = correlate_two_datasets(revised_data1, data2_shifted, include_transformed_datasets=True)
+        benchmarking['correlation'] += (datetime.datetime.now() - benchmark_start).total_seconds()
+        
         if len(correlation_at_this_lag['data1_transformed']) < 4:
             break
 
@@ -423,6 +478,8 @@ def calculate_correlations_across_lags(data1, data2, lag_unit, max_lag):
                 'correlation': correlation_at_this_lag['pearsons_before_date_filtering']
             }
         )
+
+    print(benchmarking)
     
     return lags_dataset
 
@@ -531,8 +588,8 @@ def run_app():
 
     if 'run_correlation_automatically' not in st.session_state:
         st.session_state['run_correlation_automatically'] = True
-    if 'update_lag_graph' not in st.session_state:
-        st.session_state['update_lag_graph'] = True
+    if 'lag_graph' not in st.session_state:
+        st.session_state['lag_graph'] = None
 
     st.header("Correlation Explorer")
 
@@ -592,7 +649,7 @@ def run_app():
             st.session_state.comparison_cadence = '%Y-%m' if st.session_state.dataset1['cadence'] != st.session_state.dataset2['cadence'] or st.session_state.dataset1['cadence'] == 'monthly' else '%Y-%m-%d'
 
             st.session_state.run_correlation_automatically = True
-            st.session_state.update_lag_graph = True
+            st.session_state.lag_graph = None
 
             print('Got to end of fragment, about to rerun()')
             print(list(st.session_state.keys()))
@@ -612,8 +669,6 @@ def run_app():
     print(st.session_state.run_correlation_automatically)
 
     dataset_candidates = []
-
-    st.slider(label=f"Shift each observation in dataset #2 backwards by the below number of {'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months'} before comparing datasets (see methodology section below)", min_value=0, max_value=365 if st.session_state.comparison_cadence == '%Y-%m-%d' else 12, value=0, key='dataset2_lag')
 
     with st.spinner('Loading datasets...'):
         for dataset_index in [1, 2]:
@@ -675,6 +730,8 @@ def run_app():
             dataset_candidates.append(revised_dataset)
 
 
+    st.slider(label=f"Shift each observation in dataset #2 backwards by the below number of {'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months'} before comparing datasets (see methodology section below)", min_value=0, max_value=get_max_possible_lag(dataset_candidates[0], dataset_candidates[1], min_number_of_observations=4), value=0, key='dataset2_lag')
+
     lagged_dataset2 = time_shift_the_data(dataset_candidates[1], 'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months', st.session_state.dataset2_lag) if st.session_state.dataset2_lag > 0 else dataset_candidates[1]
     datasets = correlate_two_datasets(dataset_candidates[0], lagged_dataset2, include_transformed_datasets=True)
 
@@ -733,13 +790,17 @@ def run_app():
         c = (line + line2).resolve_scale(y='independent').properties(width=600)
         st.altair_chart(c, use_container_width=True)
 
-        if st.session_state.update_lag_graph:
+        
+        with st.spinner('Generating the lag graph...'):
 
             print('Now updating lag graph...')
 
             dataset2_interval = detect_date_strftime_setting(dataset_candidates[1][0]['date'])
-            lag_chart_df = pd.DataFrame(calculate_correlations_across_lags(dataset_candidates[0], dataset_candidates[1], dataset2_interval, 12 if dataset2_interval == '%Y-%m' else 365))
-            st.write(lag_chart_df)
+            if st.session_state.lag_graph is None:
+                lag_chart_df = pd.DataFrame(calculate_correlations_across_lags(dataset_candidates[0], dataset_candidates[1], dataset2_interval))
+                st.session_state.lag_graph = lag_chart_df
+            else:
+                lag_chart_df = st.session_state.lag_graph
             lag_base = alt.Chart(lag_chart_df, height=500).encode(
                 x=alt.X('lag:Q', 
                         axis=alt.Axis(
@@ -752,10 +813,9 @@ def run_app():
             lag_line = lag_base.mark_line(color='red').encode(y=alt.Y('correlation:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title('Pearson\'s r'))
             st.altair_chart(lag_line, use_container_width=True)
 
-            st.session_state.update_lag_graph = False
-
         with st.expander("See raw data"):
             table_df
+            lag_chart_df
 
     else:
 
