@@ -488,32 +488,32 @@ def run_app():
     eligible_datasets = [
         {
             'title': 'University of Michigan Index of Consumer Sentiment',
-            'short_title': 'UMich Consumer Sentiment',
+            'short_title': 'Consumer Sentiment',
             'url': 'http://www.sca.isr.umich.edu/',
             'cadence': 'monthly'
             # 'description': 'The Index of Consumer Sentiment'
         },
         {
             'title': 'University of Michigan Index of Consumer Expectations',
-            'short_title': 'UMich Consumer Expectations',
+            'short_title': 'Consumer Expectations',
             'url': 'http://www.sca.isr.umich.edu/',
             'cadence': 'monthly'
         },
         {
             'title': 'University of Michigan Index of Current Economic Conditions',
-            'short_title': 'UMich Current Economic Conditions',
+            'short_title': 'Current Economic Conditions',
             'url': 'http://www.sca.isr.umich.edu/',
             'cadence': 'monthly'
         },
         {
             'title': 'Conference Board Consumer Confidence Index',
-            'short_title': 'Conf. Board Consumer Confidence',
+            'short_title': 'Consumer Confidence',
             'url': 'https://www.conference-board.org/topics/consumer-confidence',
             'cadence': 'monthly'
         },
         {
             'title': 'Civiqs National Economy Current Condition - Net Good',
-            'short_title': 'Civiqs Economic Sentiment',
+            'short_title': 'Economic Sentiment',
             'url': 'https://civiqs.com/results/economy_us_now?uncertainty=true&annotations=true&zoomIn=true&net=true',
             'cadence': 'daily'
         },
@@ -525,7 +525,7 @@ def run_app():
         },
         {
             'title': 'Federal Reserve Bank of San Francisco Daily News Sentiment Index',
-            'short_title': 'FRBSF Daily News Sentiment',
+            'short_title': 'Daily News Sentiment',
             'url': 'https://www.frbsf.org/research-and-insights/data-and-indicators/daily-news-sentiment-index/',
             'cadence': 'daily'
         },
@@ -537,7 +537,7 @@ def run_app():
         # },
         {
             'title': 'Civiqs Joe Biden Job Approval - Net Approve',
-            'short_title': 'Civiqs Joe Biden Job Approval',
+            'short_title': 'Biden Job Approval',
             'url': 'https://civiqs.com/results/approve_president_biden?uncertainty=true&annotations=true&zoomIn=true&net=true',
             'cadence': 'daily'
         },
@@ -721,7 +721,7 @@ def run_app():
             # This is currently a static function (doesn't retrieve most recent observations)
             elif dataset_value == 'A Democrat is President of the United States':
                 revised_dataset = get_democrat_in_white_house_data()
-                
+
             elif dataset_value == 'Federal Reserve Bank of San Francisco Daily News Sentiment Index':
                 revised_dataset = get_frb_news_sentiment_data()
             # elif dataset_value == 'GasBuddy Daily National Gas Prices':
@@ -786,21 +786,87 @@ def run_app():
         chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
 
         if st.session_state.dataset1_picker != st.session_state.dataset2_picker:
-            table_df = chart_df.rename(columns={'data1': st.session_state.dataset1_picker, 'data2': st.session_state.dataset2_picker})
+            table_df = chart_df.rename(columns={f'data1': st.session_state.dataset1_picker, 'data2': st.session_state.dataset2_picker})
             table_df = table_df[['date', st.session_state.dataset1_picker, st.session_state.dataset2_picker]]
         else:
-            table_df = chart_df.rename(columns={'data1': f'1 - {st.session_state.dataset1_picker}', 'data2': f'2 - {st.session_state.dataset2_picker}'})
+            table_df = chart_df.rename(columns={f'data1': f'1 - {st.session_state.dataset1_picker}', 'data2': f'2 - {st.session_state.dataset2_picker}'})
             table_df = table_df[['date', f'1 - {st.session_state.dataset1_picker}', f'2 - {st.session_state.dataset2_picker}']]
+
+        # st.write(table_df)
 
         dataset1_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset1_picker == x['title']), None) if st.session_state.custom_dataset_1 is None else st.session_state.custom_dataset_1['short_title']
         dataset2_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset2_picker == x['title']), None) if st.session_state.custom_dataset_2 is None else st.session_state.custom_dataset_2['short_title']
 
-        # Taken from https://stackoverflow.com/q/70117272 
-        base = alt.Chart(chart_df, height=500).encode(x=alt.X('date', axis=alt.Axis(labelAngle=325)))
-        line =  base.mark_line(color='red').encode(y=alt.Y('data1:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title(dataset1_short_title))
-        line2 = base.mark_line(color='blue').encode(y=alt.Y('data2:Q', axis=alt.Axis(titleColor='blue'), scale=alt.Scale(zero=False)).title(dataset2_short_title))
-        c = (line + line2).resolve_scale(y='independent').properties(width=600)
-        st.altair_chart(c, use_container_width=True)
+        # Create a selection that chooses the nearest point & selects based on x-value
+        nearest = alt.selection(type='single', nearest=True, on='mouseover', fields=['date'], empty='none')
+
+        # The basic line
+        line1 = alt.Chart(table_df).mark_line(color='#1f77b4').encode(
+            x=alt.X('date:T', 
+                    axis=alt.Axis(
+                        format='%b %-d, %Y',  # Format as "Mar 2023"
+                        title='Date',
+                        labelAngle=-45
+                    )
+            ),
+            y=alt.Y(f'{table_df.columns[1]}:Q', axis=alt.Axis(title=dataset1_short_title, titleColor='#1f77b4'), scale=alt.Scale(zero=False))
+        )
+
+        line2 = alt.Chart(table_df).mark_line(color='#ff7f0e').encode(
+            x='date:T',
+            y=alt.Y(f'{table_df.columns[2]}:Q', axis=alt.Axis(title=dataset2_short_title, titleColor='#ff7f0e', orient='right'), scale=alt.Scale(zero=False))
+        )
+
+        # Transparent selectors across the chart. This is what tells us
+        # the x-value of the cursor
+        selectors = alt.Chart(table_df).mark_point().encode(
+            x='date:T',
+            opacity=alt.value(0),
+            tooltip=[
+                alt.Tooltip('date:T', title='Date'),
+                alt.Tooltip(f'{table_df.columns[1]}:Q', title=dataset1_short_title),
+                alt.Tooltip(f'{table_df.columns[2]}:Q', title=dataset2_short_title)
+            ]
+        ).add_selection(
+            nearest
+        )
+
+        # Draw points on the line, and highlight based on selection
+        points1 = line1.mark_point().encode(
+            opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+        )
+
+        points2 = line2.mark_point().encode(
+            opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+        )
+
+        # Draw text labels near the points, and highlight based on selection
+        text1 = line1.mark_text(align='left', dx=5, dy=-5).encode(
+            text=alt.condition(nearest, f'{table_df.columns[1]}:Q', alt.value(' '))
+        )
+
+        text2 = line2.mark_text(align='left', dx=5, dy=5).encode(
+            text=alt.condition(nearest, f'{table_df.columns[2]}:Q', alt.value(' '))
+        )
+
+        # Draw a rule at the location of the selection
+        rules = alt.Chart(table_df).mark_rule(color='gray').encode(
+            x='date:T',
+        ).transform_filter(
+            nearest
+        )
+
+        # Layer the chart together
+        chart = alt.layer(
+            line1, line2, selectors, points1, points2, rules, text1, text2
+        ).properties(
+            width=600, height=500
+        ).resolve_scale(
+            y='independent'
+        )
+
+        # Display the chart
+        st.altair_chart(chart, use_container_width=True)
 
         
         with st.spinner('Generating the lag graph...'):
