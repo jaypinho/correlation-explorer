@@ -6,6 +6,8 @@ import io
 import datetime
 import altair as alt
 import os
+import random
+import string
 from streamlit.components.v1 import html
 st.set_page_config(page_title='Correlation Explorer', layout="wide")
 
@@ -74,7 +76,10 @@ def get_civiqs_sentiment_data():
 
     print('Not cached - Civiqs sentiment data')
 
-    sentiment = requests.get('https://results-api.civiqs.com/results_api/results/economy_us_now/trendline/%7B%7D?run_id=2e1ad200', headers={
+    characters = string.ascii_lowercase[:6] + string.digits
+    random_string = ''.join(random.choice(characters) for _ in range(8))
+
+    sentiment = requests.get(f'https://results-api.civiqs.com/results_api/results/economy_us_now/trendline/%7B%7D?run_id={random_string}', headers={
         'Accept': 'application/vnd.questionator.v3',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     }).json()
@@ -82,7 +87,7 @@ def get_civiqs_sentiment_data():
     list_data = []
     for entry, values in sentiment['trendline'].items():
         list_data.append({
-            'date': datetime.datetime.utcfromtimestamp(int(entry)/1000).strftime('%Y-%m-%d'),
+            'date': datetime.datetime.fromtimestamp(int(entry)/1000, datetime.UTC).strftime('%Y-%m-%d'),
             'value': values['Very good'] + values['Fairly good'] - values['Fairly bad'] - values['Very bad']
         })
 
@@ -93,7 +98,10 @@ def get_civiqs_biden_job_approval_data():
 
     print('Not cached - Civiqs Biden approval data')
 
-    sentiment = requests.get('https://results-api.civiqs.com/results_api/results/approve_president_biden/trendline/%7B%7D?run_id=d9030853', headers={
+    characters = string.ascii_lowercase[:6] + string.digits
+    random_string = ''.join(random.choice(characters) for _ in range(8))
+
+    sentiment = requests.get(f'https://results-api.civiqs.com/results_api/results/approve_president_biden/trendline/%7B%7D?run_id={random_string}', headers={
         'Accept': 'application/vnd.questionator.v3',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     }).json()
@@ -101,7 +109,7 @@ def get_civiqs_biden_job_approval_data():
     list_data = []
     for entry, values in sentiment['trendline'].items():
         list_data.append({
-            'date': datetime.datetime.utcfromtimestamp(int(entry)/1000).strftime('%Y-%m-%d'),
+            'date': datetime.datetime.fromtimestamp(int(entry)/1000, datetime.UTC).strftime('%Y-%m-%d'),
             'value': values['Approve'] - values['Disapprove']
         })
 
@@ -793,6 +801,7 @@ def run_app():
             table_df = table_df[['date', f'1 - {st.session_state.dataset1_picker}', f'2 - {st.session_state.dataset2_picker}']]
 
         # st.write(table_df)
+        table_df['date'] = pd.to_datetime(table_df['date'])
 
         dataset1_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset1_picker == x['title']), None) if st.session_state.custom_dataset_1 is None else st.session_state.custom_dataset_1['short_title']
         dataset2_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset2_picker == x['title']), None) if st.session_state.custom_dataset_2 is None else st.session_state.custom_dataset_2['short_title']
