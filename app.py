@@ -289,8 +289,6 @@ def get_gdp_growth_data():
     df = df[["date", "value"]]
     df = df[(df["date"] != '') & (df["date"].isnull() == False)]
     df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(str(x).strip().split(' - ')[0] + ' - ' + str(x).strip().split(' - ')[1][:3], '%Y - %b').strftime('%Y-%m'))
-    # st.write('Raw data')
-    # df
     return df.to_dict(orient='records')
 
 ######
@@ -430,6 +428,7 @@ def correlate_two_datasets(data1, data2, include_transformed_datasets=False):
     same_interval_datasets = get_datasets_into_same_interval(data1, data2)
 
     aligned_datasets = align_datasets(same_interval_datasets['data1'], same_interval_datasets['data2'], include_dates=True)
+
     aligned_datasets_without_dates = [ [ x['value'] for x in y ] for y in aligned_datasets]
 
     if include_transformed_datasets:
@@ -718,9 +717,7 @@ def run_app():
                 revised_dataset = get_fed_funds_rate_data()
             elif dataset_value == 'S&P GMI GDP Growth Rate':
                 trailing_avg = get_gdp_growth_data()
-                # st.write(pd.DataFrame(trailing_avg))
                 revised_dataset = transform_data_into_annual_rate_of_change(trailing_avg, calc_method='monthly_annualized')
-                # st.write(pd.DataFrame(revised_dataset))
 
             # Potentially daily indicators
             elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
@@ -755,29 +752,29 @@ def run_app():
     lagged_dataset2 = time_shift_the_data(dataset_candidates[1], 'days' if st.session_state.comparison_cadence == '%Y-%m-%d' else 'months', st.session_state.dataset2_lag) if st.session_state.dataset2_lag > 0 else dataset_candidates[1]
     datasets = correlate_two_datasets(dataset_candidates[0], lagged_dataset2, include_transformed_datasets=True)
 
-    min_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'])[0]['date']
-    max_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'], reverse=True)[0]['date']
-
-    min_date = datetime.datetime.strptime(min_date, st.session_state.comparison_cadence)
-    max_date = datetime.datetime.strptime(max_date, st.session_state.comparison_cadence)
-
-    if 'date_filter' in st.session_state:
-        print(st.session_state.date_filter)
-    else:
-        print('no date filter in session_state')
-    st.slider(
-        "Limit observations to a custom date range",
-        value=(min_date, max_date) if 'date_filter' not in st.session_state or st.session_state.run_correlation_automatically else (max(min_date, st.session_state.date_filter[0]), min(max_date, st.session_state.date_filter[1])),
-        min_value=min_date,
-        max_value=max_date,
-        format="YYYY-MM-DD",
-        key='date_filter'
-    )
-
-    datasets['data1_transformed'] = [x for x in datasets['data1_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
-    datasets['data2_transformed'] = [x for x in datasets['data2_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
-
     if len(datasets['data1_transformed']) >= 4:
+
+        min_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'])[0]['date']
+        max_date = sorted(datasets['data1_transformed'], key = lambda x: x['date'], reverse=True)[0]['date']
+
+        min_date = datetime.datetime.strptime(min_date, st.session_state.comparison_cadence)
+        max_date = datetime.datetime.strptime(max_date, st.session_state.comparison_cadence)
+
+        if 'date_filter' in st.session_state:
+            print(st.session_state.date_filter)
+        else:
+            print('no date filter in session_state')
+        st.slider(
+            "Limit observations to a custom date range",
+            value=(min_date, max_date) if 'date_filter' not in st.session_state or st.session_state.run_correlation_automatically else (max(min_date, st.session_state.date_filter[0]), min(max_date, st.session_state.date_filter[1])),
+            min_value=min_date,
+            max_value=max_date,
+            format="YYYY-MM-DD",
+            key='date_filter'
+        )
+
+        datasets['data1_transformed'] = [x for x in datasets['data1_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
+        datasets['data2_transformed'] = [x for x in datasets['data2_transformed'] if datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) >= st.session_state.date_filter[0] and datetime.datetime.strptime(x['date'], st.session_state.comparison_cadence) <= st.session_state.date_filter[1]]
 
         pearsons_r = calculate_pearsons([x['value'] for x in datasets['data1_transformed']], [x['value'] for x in datasets['data2_transformed']])
         # pearsons_r = datasets['pearsons_before_date_filtering']
