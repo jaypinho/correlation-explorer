@@ -790,18 +790,17 @@ def run_app():
 
         chart_df = dataset1_df.join(dataset2_df.set_index('date'), on='date')
 
-        if st.session_state.dataset1_picker != st.session_state.dataset2_picker:
-            table_df = chart_df.rename(columns={f'data1': st.session_state.dataset1_picker, 'data2': st.session_state.dataset2_picker})
-            table_df = table_df[['date', st.session_state.dataset1_picker, st.session_state.dataset2_picker]]
-        else:
-            table_df = chart_df.rename(columns={f'data1': f'1 - {st.session_state.dataset1_picker}', 'data2': f'2 - {st.session_state.dataset2_picker}'})
-            table_df = table_df[['date', f'1 - {st.session_state.dataset1_picker}', f'2 - {st.session_state.dataset2_picker}']]
-
-        # st.write(table_df)
-        table_df['date'] = pd.to_datetime(table_df['date'])
-
         dataset1_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset1_picker == x['title']), None) if st.session_state.custom_dataset_1 is None else st.session_state.custom_dataset_1['short_title']
         dataset2_short_title = next((x['short_title'] for x in eligible_datasets if st.session_state.dataset2_picker == x['title']), None) if st.session_state.custom_dataset_2 is None else st.session_state.custom_dataset_2['short_title']
+
+        if st.session_state.dataset1_picker != st.session_state.dataset2_picker:
+            table_df = chart_df.rename(columns={f'data1': dataset1_short_title, 'data2': dataset2_short_title})
+            table_df = table_df[['date', dataset1_short_title, dataset2_short_title]]
+        else:
+            table_df = chart_df.rename(columns={f'data1': f'1 - {dataset1_short_title}', 'data2': f'2 - {dataset2_short_title}'})
+            table_df = table_df[['date', f'1 - {dataset1_short_title}', f'2 - {dataset2_short_title}']]
+
+        table_df['date'] = pd.to_datetime(table_df['date'])
 
         # Create a selection that chooses the nearest point & selects based on x-value
         nearest = alt.selection(type='single', nearest=True, on='mouseover', fields=['date'], empty='none')
@@ -815,12 +814,12 @@ def run_app():
                         labelAngle=-45
                     )
             ),
-            y=alt.Y(f'{table_df.columns[1]}:Q', axis=alt.Axis(title=dataset1_short_title, titleColor='#1f77b4'), scale=alt.Scale(zero=False))
+            y=alt.Y(f'{dataset1_short_title}:Q', axis=alt.Axis(title=dataset1_short_title, titleColor='#1f77b4'), scale=alt.Scale(zero=False))
         )
 
         line2 = alt.Chart(table_df).mark_line(color='#ff7f0e').encode(
             x='date:T',
-            y=alt.Y(f'{table_df.columns[2]}:Q', axis=alt.Axis(title=dataset2_short_title, titleColor='#ff7f0e', orient='right'), scale=alt.Scale(zero=False))
+            y=alt.Y(f'{dataset2_short_title}:Q', axis=alt.Axis(title=dataset2_short_title, titleColor='#ff7f0e', orient='right'), scale=alt.Scale(zero=False))
         )
 
         # Transparent selectors across the chart. This is what tells us
@@ -830,8 +829,8 @@ def run_app():
             opacity=alt.value(0),
             tooltip=[
                 alt.Tooltip('date:T', title='Date'),
-                alt.Tooltip(f'{table_df.columns[1]}:Q', title=dataset1_short_title),
-                alt.Tooltip(f'{table_df.columns[2]}:Q', title=dataset2_short_title)
+                alt.Tooltip(f'{dataset1_short_title}:Q', title=dataset1_short_title),
+                alt.Tooltip(f'{dataset2_short_title}:Q', title=dataset2_short_title)
             ]
         ).add_selection(
             nearest
@@ -928,8 +927,12 @@ def run_app():
             Secondly, when comparing two datasets whose observations occur at *different cadences* - e.g., one is reported monthly and the other is reported daily - I average the higher-frequency dataset over the lower-frequency cadence. An example of this would be correlating average gas prices (a dataset with daily observations) to consumer sentiment indices (which are generally measured monthly): in this case, I first average the daily gas prices for each month before correlating them with the monthly consumer sentiment index dataset.
                 
             Additionally, you can time-shift the second dataset up to 365 days or 12 months back in time (depending on whether the correlation is being calculated on a daily or monthly basis, respectively). This allows you to measure correlations for lagging indicators: for example, it is possible that today's consumer sentiment correlates more closely with gas prices from 3 months ago rather than their current price right now.
+                 
+            The line chart, and the data table directly above it, represent these datasets *after* all of these adjustments are made. (You can export/download the data to check it yourself and conduct your own analyses.)
+                 
+            Lastly, the lag chart (just below the main correlation line chart) measures the value of Pearson's r at varying amounts of time lag in the second dataset. This provides an easy visual cue for understanding how much time lag creates the best correlation. To reuse the example from earlier, it makes clear just how many days of delay (if any) there are before higher gas prices correlate with presidential job approval.    
                 
-            The line chart, and the data table directly above it, represent these datasets *after* all of these adjustments are made. (You can export/download the data to check it yourself and conduct your own analyses.) If you see any errors or bugs, please let me know!
+            If you see any errors or bugs, please let me know!
         ''')
 
     html('''
