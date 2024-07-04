@@ -291,6 +291,26 @@ def get_gdp_growth_data():
     df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(str(x).strip().split(' - ')[0] + ' - ' + str(x).strip().split(' - ')[1][:3], '%Y - %b').strftime('%Y-%m'))
     return df.to_dict(orient='records')
 
+@st.cache_data
+def get_ism_pmi_data(version):
+
+    if version == 'manufacturing':
+        securities = 'id%3AI%3AUSPMI%2Cinclude%3Atrue%2C%2C'
+    elif version == 'services':
+        securities = 'id%3AI%3AISMNMI%2Cinclude%3Atrue%2C%2C'
+
+    pmi = requests.get(f'https://ycharts.com/charts/fund_data.json?calcs=&chartId=&chartType=interactive&correlations=&customGrowthAmount=&dataInLegend=value&dateSelection=range&displayDateRange=false&endDate=&format=real&legendOnChart=false&lineAnnotations=&nameInLegend=name_and_ticker&note=&partner=basic_2000&quoteLegend=false&recessions=false&scaleType=linear&securities={securities}&securityGroup=&securitylistName=&securitylistSecurityId=&source=false&splitType=single&startDate=&title=&units=false&useCustomColors=false&useEstimates=false&zoom=5&hideValueFlags=false&redesign=true&chartAnnotations=&axisExtremes=&maxPoints=976&chartCreator=false', headers={'user-agent': os.environ.get('UNIVERSAL_USER_AGENT')}).json()
+
+    entire_table = []
+
+    for observation in pmi['chart_data'][0][0]['raw_data']:
+        entire_table.append({
+            'date': datetime.datetime.fromtimestamp(observation[0] / 1000).strftime("%Y-%m"),
+            'value': observation[1]
+        })
+
+    return entire_table
+
 ######
 ## The below section includes various utility and data manipulation functions
 ######
@@ -590,6 +610,18 @@ def run_app():
             'url': 'https://www.spglobal.com/marketintelligence/en/mi/products/us-monthly-gdp-index.html',
             'cadence': 'monthly',
             'description': 'The GDP growth rate is calculated here by annualizing the change in estimated monthly GDP. See https://cdn.ihsmarkit.com/www/pdf/1020/US-Monthly-GDP-Current-Index.pdf for examples.'
+        },
+        {
+            'title': 'ISM Manufacturing Purchasing Managers Index (PMI)',
+            'short_title': 'Manufacturing PMI',
+            'url': 'https://ycharts.com/indicators/us_pmi',
+            'cadence': 'monthly'
+        },
+        {
+            'title': 'ISM Services Purchasing Managers Index (PMI)',
+            'short_title': 'Services PMI',
+            'url': 'https://ycharts.com/indicators/us_ism_non_manufacturing_index',
+            'cadence': 'monthly'
         }
     ]
 
@@ -718,6 +750,10 @@ def run_app():
             elif dataset_value == 'S&P GMI GDP Growth Rate':
                 trailing_avg = get_gdp_growth_data()
                 revised_dataset = transform_data_into_annual_rate_of_change(trailing_avg, calc_method='monthly_annualized')
+            elif dataset_value == 'ISM Manufacturing Purchasing Managers Index (PMI)':
+                revised_dataset = get_ism_pmi_data(version='manufacturing')
+            elif dataset_value == 'ISM Services Purchasing Managers Index (PMI)':
+                revised_dataset = get_ism_pmi_data(version='services')
 
             # Potentially daily indicators
             elif dataset_value == 'Civiqs National Economy Current Condition - Net Good':
