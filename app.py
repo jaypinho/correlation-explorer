@@ -311,6 +311,21 @@ def get_ism_pmi_data(version):
 
     return entire_table
 
+@st.cache_data
+def get_polymarket_biden_odds():
+
+    polymarket = requests.get('https://clob.polymarket.com/prices-history?interval=all&market=88027839609243624193415614179328679602612916497045596227438675518749602824929&fidelity=1440').json()
+
+    entire_table = []
+
+    for observation in polymarket['history']:
+        entire_table.append({
+            'date': datetime.datetime.fromtimestamp(observation['t']).strftime("%Y-%m-%d"),
+            'value': observation['p']
+        })
+
+    return entire_table
+
 ######
 ## The below section includes various utility and data manipulation functions
 ######
@@ -599,6 +614,12 @@ def run_app():
             'cadence': 'daily'
         },
         {
+            'title': 'Polymarket Odds of Biden 2024 Victory',
+            'short_title': 'Polymarket Biden Odds',
+            'url': 'https://polymarket.com/event/presidential-election-winner-2024',
+            'cadence': 'daily'
+        },
+        {
             'title': 'Federal Funds Effective Rate',
             'short_title': 'Fed Funds Rate',
             'url': 'https://fred.stlouisfed.org/series/FEDFUNDS',
@@ -773,6 +794,8 @@ def run_app():
                 revised_dataset = get_joe_biden_polling_average()
             elif dataset_value == 'PredictIt Odds of Biden 2024 Victory':
                 revised_dataset = get_predictit_prices()
+            elif dataset_value == 'Polymarket Odds of Biden 2024 Victory':
+                revised_dataset = get_polymarket_biden_odds()
 
             # Custom datasets
             elif st.session_state.custom_dataset_1 is not None and dataset_index == 1:
