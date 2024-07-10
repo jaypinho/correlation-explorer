@@ -965,7 +965,7 @@ def run_app():
                         )
                 ).title(f'{"Months" if dataset2_interval == "%Y-%m" else "Days"} of Lag')
             )
-            lag_line = lag_base.mark_line(color='red').encode(y=alt.Y('correlation:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(zero=False)).title('Pearson\'s r'))
+            lag_line = lag_base.mark_line(color='red').encode(y=alt.Y('correlation:Q', axis=alt.Axis(grid=True, titleColor='red'), scale=alt.Scale(domain=[-1, 1])).title('Pearson\'s r'))
             st.altair_chart(lag_line, use_container_width=True)
 
         with st.expander("See raw data"):
