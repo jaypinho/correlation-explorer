@@ -326,6 +326,24 @@ def get_polymarket_biden_odds():
 
     return entire_table
 
+@st.cache_data
+def get_initial_jobless_claims():
+
+    import http.client
+
+    conn = http.client.HTTPSConnection("oui.doleta.gov")
+    payload = "begyr=1967&endyr=2024&chartnum=a2"
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Cookie': 'cookieOUI=cookieOUIValue; mycookie=cookie_value; PHPSESSID=3kemul11db9sinj0bkcsfdnb4r; cookieOUI=cookieOUIValue'
+    }
+    conn.request("POST", "/unemploy/Chartbook/createdf.php", payload, headers)
+    res = conn.getresponse()
+    data = res.read()
+    print(data.decode("utf-8"))
+
+
+
 ######
 ## The below section includes various utility and data manipulation functions
 ######
@@ -488,27 +506,19 @@ def calculate_correlations_across_lags(data1, data2, lag_unit):
     # The below section is all about making the upcoming iterative portion much more efficient by shrinking the two datasets to the smallest possible size they can be while still supporting all the lag values necessary 
     same_interval_datasets = get_datasets_into_same_interval(data1, data2)
 
+    # This calculates the max number of days or months that we can allow dataset 2 to be lagged, given the date overlap between the two original/unaltered datasets
     max_lag = get_max_possible_lag(same_interval_datasets['data1'], same_interval_datasets['data2'])
-
-    dates_in_common = [ x['date'] for x in same_interval_datasets['data1'] if x['date'] in [y['date'] for y in same_interval_datasets['data2']] ]
-
-    # min_date finds whichever is later, the min date from data1 or the min date from data2
-    min_date = datetime.datetime.strptime(sorted(dates_in_common)[0], same_interval_datasets['interval'])
-    max_date = datetime.datetime.strptime(sorted(dates_in_common, reverse=True)[0], same_interval_datasets['interval']) + (pd.DateOffset(days=max_lag) if same_interval_datasets['interval'] == '%Y-%m-%d' else pd.DateOffset(months=max_lag))
-
-    revised_data1 = [x for x in same_interval_datasets['data1'] if datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) >= min_date and datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) <= max_date]
-    revised_data2 = [x for x in same_interval_datasets['data2'] if datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) >= min_date and datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) <= max_date]
 
     for lag in range(0, max_lag+1):
 
         print(lag, max_lag)
 
         benchmark_start = datetime.datetime.now()
-        data2_shifted = time_shift_the_data(revised_data2, 'days' if lag_unit == '%Y-%m-%d' else 'months', lag)
+        data2_shifted = time_shift_the_data(same_interval_datasets['data2'], 'days' if lag_unit == '%Y-%m-%d' else 'months', lag)
         benchmarking['time_shift'] += (datetime.datetime.now() - benchmark_start).total_seconds()
 
         benchmark_start = datetime.datetime.now()
-        correlation_at_this_lag = correlate_two_datasets(revised_data1, data2_shifted, include_transformed_datasets=True)
+        correlation_at_this_lag = correlate_two_datasets(same_interval_datasets['data1'], data2_shifted, include_transformed_datasets=True)
         benchmarking['correlation'] += (datetime.datetime.now() - benchmark_start).total_seconds()
         
         if len(correlation_at_this_lag['data1_transformed']) < 4:
@@ -517,7 +527,8 @@ def calculate_correlations_across_lags(data1, data2, lag_unit):
         lags_dataset.append(
             {
                 'lag': lag,
-                'correlation': correlation_at_this_lag['pearsons_before_date_filtering']
+                'correlation': correlation_at_this_lag['pearsons_before_date_filtering'],
+                'observation_count': len(correlation_at_this_lag['data1_transformed'])
             }
         )
 
@@ -935,10 +946,12 @@ def run_app():
         
         with st.spinner('Generating the lag graph...'):
 
-            print('Now updating lag graph...')
+            # print('Now updating lag graph...')
 
             dataset2_interval = st.session_state.comparison_cadence
             if st.session_state.lag_graph is None:
+                print('Recalculating lag graph...')
+                print('comparison cadence is', dataset2_interval)
                 lag_chart_df = pd.DataFrame(calculate_correlations_across_lags(dataset_candidates[0], dataset_candidates[1], dataset2_interval))
                 st.session_state.lag_graph = lag_chart_df
             else:
@@ -1025,3 +1038,5 @@ def run_app():
 
 
 run_app()
+
+# get_initial_jobless_claims()
