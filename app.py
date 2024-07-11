@@ -503,34 +503,43 @@ def calculate_correlations_across_lags(data1, data2, lag_unit):
         'correlation': 0
     }
 
-    # The below section is all about making the upcoming iterative portion much more efficient by shrinking the two datasets to the smallest possible size they can be while still supporting all the lag values necessary 
+    # The below section is all about making the upcoming iterative portion much more efficient by shrinking the two datasets to the smallest possible size they can be while still supporting all the lag values necessary. This helps speed up lag graph calculations by discarding observations that have no chance of being used in a correlation calculation at any allowable amount of lag. 
     same_interval_datasets = get_datasets_into_same_interval(data1, data2)
-
-    # This calculates the max number of days or months that we can allow dataset 2 to be lagged, given the date overlap between the two original/unaltered datasets
     max_lag = get_max_possible_lag(same_interval_datasets['data1'], same_interval_datasets['data2'])
+    dates_in_common = [ x['date'] for x in same_interval_datasets['data1'] if x['date'] in [y['date'] for y in same_interval_datasets['data2']] ]
+    min_date = datetime.datetime.strptime(sorted(dates_in_common)[0], same_interval_datasets['interval']) # min_date represents the earliest possible date that can exist in both datasets to be used for a correlation measurement, at any allowable amount of lag. (It has to be the earliest date in common between the two datasets because, no matter how much lag is applied to the second dataset, its first observation eligible for a correlation measurement can never be *earlier* than the first date in common between the two un-lagged datasets.)
+    if datetime.datetime.strptime(sorted(same_interval_datasets['data1'], key=lambda x: x['date'])[-1]['date'], same_interval_datasets['interval']) <= datetime.datetime.strptime(sorted(same_interval_datasets['data2'], key=lambda x: x['date'])[-1]['date'], same_interval_datasets['interval']): # This one is slightly more complicated. The max_date is the *latest* date that could possibly be used in a correlation comparison between the two datasets in any allowable amount of lag. If the un-lagged second dataset ends *before* the first dataset, we need to set max_date to a later date than the last one in common between the two un-lagged datasets -- because as the second dataset is lagged progressively longer, the latest date in common between the two datasets also gets later and later (but cannot ever go any later than the first dataset's latest date). On the other hand, if the first dataset ends *before* the un-lagged second dataset, the max_date should just be set to the first dataset's max_date.
+        max_date = datetime.datetime.strptime(sorted(same_interval_datasets['data1'], key=lambda x: x['date'])[-1]['date'], same_interval_datasets['interval'])
+    else: # In this case, the first dataset's last date is AFTER the second (un-lagged) dataset's last date, so we need to account for this
+        max_date = min(datetime.datetime.strptime(sorted(dates_in_common, reverse=True)[0], same_interval_datasets['interval']) + (pd.DateOffset(days=max_lag) if same_interval_datasets['interval'] == '%Y-%m-%d' else pd.DateOffset(months=max_lag)), datetime.datetime.strptime(sorted(same_interval_datasets['data1'], key=lambda x: x['date'])[-1]['date'], same_interval_datasets['interval']))
+
+    revised_data1 = [x for x in same_interval_datasets['data1'] if datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) >= min_date and datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) <= max_date]
+    revised_data2 = [x for x in same_interval_datasets['data2'] if datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) >= min_date and datetime.datetime.strptime(x['date'], same_interval_datasets['interval']) <= max_date]
 
     for lag in range(0, max_lag+1):
 
-        print(lag, max_lag)
+        with st.spinner(f'Generating data for {lag+1} out of {max_lag} lagging intervals...'):
 
-        benchmark_start = datetime.datetime.now()
-        data2_shifted = time_shift_the_data(same_interval_datasets['data2'], 'days' if lag_unit == '%Y-%m-%d' else 'months', lag)
-        benchmarking['time_shift'] += (datetime.datetime.now() - benchmark_start).total_seconds()
+            print(lag, max_lag)
 
-        benchmark_start = datetime.datetime.now()
-        correlation_at_this_lag = correlate_two_datasets(same_interval_datasets['data1'], data2_shifted, include_transformed_datasets=True)
-        benchmarking['correlation'] += (datetime.datetime.now() - benchmark_start).total_seconds()
-        
-        if len(correlation_at_this_lag['data1_transformed']) < 4:
-            break
+            benchmark_start = datetime.datetime.now()
+            data2_shifted = time_shift_the_data(revised_data2, 'days' if lag_unit == '%Y-%m-%d' else 'months', lag)
+            benchmarking['time_shift'] += (datetime.datetime.now() - benchmark_start).total_seconds()
 
-        lags_dataset.append(
-            {
-                'lag': lag,
-                'correlation': correlation_at_this_lag['pearsons_before_date_filtering'],
-                'observation_count': len(correlation_at_this_lag['data1_transformed'])
-            }
-        )
+            benchmark_start = datetime.datetime.now()
+            correlation_at_this_lag = correlate_two_datasets(revised_data1, data2_shifted, include_transformed_datasets=True)
+            benchmarking['correlation'] += (datetime.datetime.now() - benchmark_start).total_seconds()
+            
+            if len(correlation_at_this_lag['data1_transformed']) < 4:
+                break
+
+            lags_dataset.append(
+                {
+                    'lag': lag,
+                    'correlation': correlation_at_this_lag['pearsons_before_date_filtering'],
+                    'observation_count': len(correlation_at_this_lag['data1_transformed'])
+                }
+            )
 
     print(benchmarking)
     
