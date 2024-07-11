@@ -712,6 +712,10 @@ def run_app():
                     'url': None,
                     'cadence': 'monthly' if detect_date_strftime_setting(temp_dataset[0]['date']) == '%Y-%m' else 'daily'
                 }
+                
+            else:
+
+                st.session_state.custom_dataset_1 = None
 
             if st.session_state.dataset2_picker == 'Upload my own dataset':
 
@@ -723,6 +727,10 @@ def run_app():
                     'url': None,
                     'cadence': 'monthly' if detect_date_strftime_setting(temp_dataset[0]['date']) == '%Y-%m' else 'daily'
                 }
+
+            else:
+
+                st.session_state.custom_dataset_2 = None
 
             st.session_state.dataset1 = next((x for x in eligible_datasets if x['title'] == st.session_state.dataset1_picker), None) if st.session_state.custom_dataset_1 is None else st.session_state.custom_dataset_1
             st.session_state.dataset2 = next((x for x in eligible_datasets if x['title'] == st.session_state.dataset2_picker), None) if st.session_state.custom_dataset_2 is None else st.session_state.custom_dataset_2
