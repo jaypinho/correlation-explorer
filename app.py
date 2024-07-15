@@ -329,19 +329,9 @@ def get_polymarket_biden_odds():
 @st.cache_data(ttl=3600)
 def get_initial_jobless_claims():
 
-    import http.client
-
-    conn = http.client.HTTPSConnection("oui.doleta.gov")
-    payload = "begyr=1967&endyr=2024&chartnum=a2"
-    headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Cookie': 'cookieOUI=cookieOUIValue; mycookie=cookie_value; PHPSESSID=3kemul11db9sinj0bkcsfdnb4r; cookieOUI=cookieOUIValue'
-    }
-    conn.request("POST", "/unemploy/Chartbook/createdf.php", payload, headers)
-    res = conn.getresponse()
-    data = res.read()
-    print(data.decode("utf-8"))
-
+    jobless = requests.get(f'https://api.stlouisfed.org/fred/series/observations?series_id=ICSA&api_key={os.environ.get("FRED_API_KEY")}&file_type=json').json()
+    list_data = [{'date': x['date'], 'value': float(x['value']) } for x in jobless['observations']]
+    return list_data
 
 
 ######
@@ -663,6 +653,12 @@ def run_app():
             'short_title': 'Services PMI',
             'url': 'https://ycharts.com/indicators/us_ism_non_manufacturing_index',
             'cadence': 'monthly'
+        },
+        {
+            'title': 'Unemployment Insurance Weekly Claims',
+            'short_title': 'Initial Jobless Claims',
+            'url': 'https://fred.stlouisfed.org/series/ICSA',
+            'cadence': 'daily'
         }
     ]
 
@@ -824,6 +820,8 @@ def run_app():
                 revised_dataset = get_predictit_prices()
             elif dataset_value == 'Polymarket Odds of Biden 2024 Victory':
                 revised_dataset = get_polymarket_biden_odds()
+            elif dataset_value == 'Unemployment Insurance Weekly Claims':
+                revised_dataset = get_initial_jobless_claims()
 
             # Custom datasets
             elif st.session_state.custom_dataset_1 is not None and dataset_index == 1:
@@ -1011,9 +1009,9 @@ def run_app():
                 
             To acccount for this, I have made two key adjustments to the datasets.
                 
-            First, I only include the data points from *dates in common* between the two datasets being compared. For example, when comparing a monthly dataset with observations from June 2019 to May 2023 with another dataset running from August 2001 to February 2024, I will trim both datasets so they only include observations between August 2001 and May 2023, a period during which both datasets have observations. (You can further limit the date range using the slider.)
+            First, I only include the data points from *dates in common* between the two datasets being compared. For example, when comparing a monthly dataset with observations from June 2019 to May 2023 with another dataset running from August 2001 to February 2024, I will trim both datasets so they only include observations between August 2001 and May 2023, a period during which both datasets have observations. (You can further limit the date range using the slider.) I also remove any dates that are missing from the middle of one dataset from the other one as well.
                 
-            Secondly, when comparing two datasets whose observations occur at *different cadences* - e.g., one is reported monthly and the other is reported daily - I average the higher-frequency dataset over the lower-frequency cadence. An example of this would be correlating average gas prices (a dataset with daily observations) to consumer sentiment indices (which are generally measured monthly): in this case, I first average the daily gas prices for each month before correlating them with the monthly consumer sentiment index dataset.
+            Secondly, when comparing two datasets whose observations occur at *different cadences* - e.g., one is reported monthly and the other is reported daily - I average the higher-frequency dataset over the lower-frequency cadence. An example of this would be correlating Joe Biden's 538 polling average (a dataset with daily observations) to consumer sentiment indices (which are generally measured monthly): in this case, I first average the daily polling averages for each month before correlating them with the monthly consumer sentiment index dataset. (This is not always possible: initial jobless claims, for example, occur at a weekly cadence, so any dataset correlated with that one will only include the dates in common with the weekly releases.)
                 
             Additionally, you can time-shift the second dataset up to 365 days or 12 months back in time (depending on whether the correlation is being calculated on a daily or monthly basis, respectively). This allows you to measure correlations for lagging indicators: for example, it is possible that today's consumer sentiment correlates more closely with gas prices from 3 months ago rather than their current price right now.
                  
@@ -1056,4 +1054,4 @@ def run_app():
 
 run_app()
 
-# get_initial_jobless_claims()
+# print(get_initial_jobless_claims())
